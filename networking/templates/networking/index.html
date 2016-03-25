@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load qr_tags %}
+
+{% block content %}
+
+    <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp card">
+        <div class="mdl-layout-title">Connect</div>
+        <div class="fa-qrcode">
+            {% qr_from_text connect_url %}
+        </div>
+    </div>
+{% endblock %}
