@@ -18,4 +18,31 @@
 }
 .device-listing {
     position: relative;
+    flex-grow: 2;
+    margin-top: 32px;
+}
+
+.connection-info {
+    display: flex;
+    flex-direction: row;
+}
+
+.connection-title {
+    padding: 0 16px;
+}
+
+.qrcode-container {
+    display: flex;
+    flex-direction: column;
+    padding-right: 16px;
+}
+
+.fa-qrcode {
+    width: 230px;
+    height: 230px;
+}
+
+.trace-button {
+    float: right;
+    margin-right: 20px;
 }
