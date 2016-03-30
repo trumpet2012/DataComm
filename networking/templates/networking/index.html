@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load qr_tags %}
+{% load qr_tags staticfiles %}
 
 {% block content %}
 
@@ -8,5 +8,48 @@
         <div class="fa-qrcode">
             {% qr_from_text connect_url %}
         </div>
+        <div class="device-listing">
+            <div class="device-header mdl-color--amber-600">
+                <h4 class="device-header-text">Devices</h4>
+                <button class="mdl-button mdl-js-button mdl-button--icon refresh">
+                  <i class="material-icons">refresh</i>
+                </button>
+            </div>
+            <div id="devices">
+
+            </div>
+        </div>
     </div>
 {% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'js/devices.js' %}"></script>
+    <script>
+        var device_listing_div = $('#devices');
+        var device_url = "{% url 'device_listing' %}";
+        var session_key = "{{ session_key }}";
+        var material_js_url = "{% static 'js/material.min.js' %}";
+        fetch_devices(device_url, session_key);
+        $('.refresh').on('click', function(){
+            $('#devices').find('li').addClass('loading');
+            var loading_text = $('<span>Loading...</span>');
+            loading_text.css({
+                width: '100%',
+                height: '100%',
+                position: 'absolute',
+                'text-align': 'center',
+                top: '50%',
+                opacity: 1
+            }).appendTo(device_listing_div);
+            fetch_devices(device_url, session_key)
+                .done(function(data){
+                    // Reapply the MDL stylings that were lost after the ajax call.
+                    componentHandler.upgradeDom();
+                })
+                .error(function(data){
+                    $('#devices').find('li').removeClass('loading');
+                    loading_text.remove();
+                });
+        })
+    </script>
+{% endblock scripts %}

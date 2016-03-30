@@ -1,6 +1,7 @@
 import urllib
 
 from django.http import HttpResponse
+from django.http.response import JsonResponse
 from django.shortcuts import render
 from scapy import route
 from scapy.layers.inet import IP, TCP, traceroute, ICMP
@@ -11,7 +12,6 @@ from .models import Session, Device
 
 
 def index(request):
-    print "Calling index"
     # ans = sr1(IP(dst="www.google.com", ttl=(1,10))/ICMP(), timeout=10)
     # print ans
     # summary = ans.summary(lambda(s, r): r.sprintf("%IP.src\t{ICMP:%ICMP.type%}\t{TCP:%TCP.flags%}"))
@@ -20,7 +20,6 @@ def index(request):
     connect_session = None
     if connect_session_key is not None:
         try:
-            print connect_session_key
             connect_session = Session.objects.get(key=connect_session_key)
         except Session.DoesNotExist:
             return render(request, 'networking/index.html', {'error': 'Invalid session key provided.'})
@@ -33,7 +32,27 @@ def index(request):
         device = Device.objects.create(ip=request.ip, session=connect_session)
 
     connect_url = "http://%s?%s" % (request.META['HTTP_HOST'], urllib.urlencode({'session': device.session.key}))
-    print connect_url
     return render(request, 'networking/index.html', {
-        'connect_url': connect_url
+        'connect_url': connect_url,
+        'session_key': device.session.key,
+    })
+
+
+def device_listing(request):
+    """
+        Ajax view for listing all devices attached to the specified session. Session key must be passed as a
+        get parameter.
+    """
+    devices = []
+    connect_session_key = request.GET.get('session', None)
+    if connect_session_key is not None:
+        try:
+            connect_session = Session.objects.get(key=connect_session_key)
+        except Session.DoesNotExist:
+            pass
+        else:
+            devices = Device.objects.filter(session=connect_session)
+
+    return render(request, 'networking/device_listing.html', context={
+        'devices': devices
     })
