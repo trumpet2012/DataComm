@@ -3,11 +3,11 @@ import urllib
 from django.http import HttpResponse
 from django.http.response import JsonResponse
 from django.shortcuts import render
+from scapy.all import *
 from scapy import route
 from scapy.layers.inet import IP, TCP, traceroute, ICMP
 from scapy.sendrecv import sr, sr1
 from scapy.volatile import RandShort
-
 from .models import Session, Device
 
 
@@ -44,6 +44,8 @@ def device_listing(request):
         get parameter.
     """
     devices = []
+    my = None
+
     connect_session_key = request.GET.get('session', None)
     if connect_session_key is not None:
         try:
@@ -51,8 +53,14 @@ def device_listing(request):
         except Session.DoesNotExist:
             pass
         else:
-            devices = Device.objects.filter(session=connect_session)
+            devices = Device.objects.filter(session=connect_session).exclude(ip=request.ip)
+            try:
+                my = Device.objects.get(session=connect_session, ip=request.ip)
+            except Device.DoesNotExist:
+                pass
 
     return render(request, 'networking/device_listing.html', context={
-        'devices': devices
+        'devices': devices, 'my': my
     })
+
+

@@ -13,12 +13,6 @@
                 <input type="text" value="{{ connect_url }}" readonly/>
             </div>
             <div class="device-listing">
-                <div class="device-header mdl-color--amber-600">
-                    <h4 class="device-header-text">Devices</h4>
-                    <button class="mdl-button mdl-js-button mdl-button--icon refresh">
-                      <i class="material-icons">refresh</i>
-                    </button>
-                </div>
                 <div id="devices">
 
                 </div>
@@ -38,7 +32,12 @@
         var device_url = "{% url 'device_listing' %}";
         var session_key = "{{ session_key }}";
         var material_js_url = "{% static 'js/material.min.js' %}";
-        fetch_devices(device_url, session_key);
+        fetch_devices(device_url, session_key)
+            .done(function(data){
+                    // Reapply the MDL stylings that were lost after the ajax call.
+                    componentHandler.upgradeDom();
+                });
+
         $('.refresh').on('click', function(){
             $('#devices').find('li').addClass('loading');
             var loading_text = $('<span>Loading...</span>');
@@ -58,7 +57,15 @@
                 .error(function(data){
                     $('#devices').find('li').removeClass('loading');
                     loading_text.remove();
+                })
+        });
+
+        setInterval(function()
+            {fetch_devices(device_url, session_key)
+                .done(function(data){
+                    // Reapply the MDL stylings that were lost after the ajax call.
+                    componentHandler.upgradeDom();
                 });
-        })
+            }, 5000);
     </script>
 {% endblock scripts %}

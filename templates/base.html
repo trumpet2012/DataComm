@@ -7,8 +7,6 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="{% static 'css/material.min.css' %}" type="text/css" rel="stylesheet"/>
     <link href="{% static 'css/styles.css' %}" type="text/css" rel="stylesheet"/>
-    {% block styles %}
-    {% endblock styles %}
 </head>
 <body>
 <!-- Always shows a header, even in smaller screens. -->
@@ -28,8 +26,10 @@
     <main class="mdl-layout__content">
         <div class="page-content mdl-grid">
             {% block content %}
-
             {% endblock content %}
+
+            {% block styles %}
+            {% endblock styles %}
         </div>
     </main>
 </div>
