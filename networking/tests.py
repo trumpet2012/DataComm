@@ -1,6 +1,6 @@
 from scapy.all import *
 #Test Here
-#Change plee
+#Change plee...
 hostname = "georgiasouthern.edu"
 for i in range(1, 28):
     pkt = sr(IP(dst=hostname, ttl=i) / ICMP())
