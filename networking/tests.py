@@ -3,16 +3,16 @@ from scapy.all import *
 
 hostname = "georgiasouthern.edu"
 for i in range(1, 28):
-    pkt = IP(dst=hostname, ttl=i) / UDP(dport=33434)
+    pkt = sr(IP(dst=hostname, ttl=i) / ICMP())
     # Send the packet and get a reply
-    reply = sr1(pkt, verbose=0)
-    if reply is None:
+    response = sr1(pkt, verbose=0)
+    if response is None:
         # No reply =(
         continue
-    elif reply.type == 3:
+    elif response.type == 3:
         # We've reached our destination
-        print "Done!", reply.src
+        print "Done!", response.src
         break
     else:
         # We're in the middle somewhere
-        print "%d hops away: " % i , reply.src
+        print "%d hops away: " % i , response.src
