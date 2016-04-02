@@ -3,7 +3,7 @@
 
 {% block content %}
 
-    <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp card">
+    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--3-col-tablet mdl-cell--4-col-desktop mdl-shadow--2dp card">
         <div class="mdl-layout-title connection-title">Session Information</div>
         <div class="connection-info">
             <div class="qrcode-container">
@@ -12,6 +12,10 @@
                 </div>
                 <input type="text" value="{{ connect_url }}" readonly/>
             </div>
+        </div>
+    </div>
+    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--5-col-tablet mdl-cell--8-col-desktop mdl-shadow--2dp card">
+
             <div class="device-listing">
                 <div class="device-header mdl-color--amber-600">
                     <h4 class="device-header-text">Devices</h4>
@@ -19,14 +23,22 @@
                       <i class="material-icons">refresh</i>
                     </button>
                 </div>
-                <div id="devices">
+                <form id="trace-form">
+                    {% csrf_token %}
+                    <div id="devices">
 
-                </div>
-                <button class="mdl-button mdl-button-js mdl-color--green-400 trace-button">
-                    <i class="material-icons">device_hub</i>
-                    Trace
-                </button>
+                    </div>
+                    <button class="mdl-button mdl-button-js mdl-color--green-400 trace-button">
+                        <i class="material-icons">device_hub</i>
+                        Trace
+                    </button>
+                </form>
             </div>
+
+    </div>
+    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--12-col-tablet mdl-cell--12-col-desktop mdl-shadow--2dp card" id="trace-card">
+        <div id="trace-results">
+
         </div>
     </div>
 {% endblock %}
@@ -59,6 +71,29 @@
                     $('#devices').find('li').removeClass('loading');
                     loading_text.remove();
                 });
-        })
+        });
+
+        var traceForm = $('form');
+        var traceUrl = '{% url "trace" %}';
+        traceForm.submit(function(event){
+            var formData = traceForm.serializeArray();
+            var formDict = {};
+            $.each(formData, function(index, data){
+                console.log(data);
+                if (data.name in formDict){
+                    if (formDict[data.name].constructor == Array){
+                        formDict[data.name].append(data.value);
+                    } else {
+                        var oldResults = formDict[data.name];
+                        formDict[data.name] = [oldResults, data.value];
+                    }
+                }else{
+                    formDict[data.name] = data.value;
+                }
+            });
+            console.log(formDict);
+            perform_trace(traceUrl, formData);
+            event.preventDefault();
+        });
     </script>
 {% endblock scripts %}

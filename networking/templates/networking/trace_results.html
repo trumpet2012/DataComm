@@ -1,0 +1,21 @@
+{% for trace in traces.list %}
+    <h4>Trace to {{ trace.target.original }}</h4>
+    <table class="mdl-data-table mdl-js-data-table trace-table">
+      <thead>
+        <tr>
+          <th class="mdl-data-table__cell--non-numeric">Hop</th>
+          <th class="mdl-data-table__cell--non-numeric">Domain</th>
+          <th class="mdl-data-table__cell--non-numeric">IP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for hop in trace.results %}
+            <tr>
+              <td class="mdl-data-table__cell--non-numeric">{{ hop.hop }}</td>
+              <td class="mdl-data-table__cell--non-numeric">{{ hop.domain }}</td>
+              <td class="mdl-data-table__cell--non-numeric">{{ hop.ip }}</td>
+            </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+{% endfor %}

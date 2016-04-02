@@ -9,7 +9,7 @@
         </span>
         <span class="mdl-list__item-secondary-action">
           <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="list-checkbox-{{ forloop.counter }}">
-              <input type="checkbox" id="list-checkbox-{{ forloop.counter }}" class="mdl-checkbox__input" value="{{ device.ip }}" checked/>
+              <input type="checkbox" name="devices" id="list-checkbox-{{ forloop.counter }}" class="mdl-checkbox__input" value={{ device.id }} />
           </label>
         </span>
     </li>

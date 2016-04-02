@@ -25,10 +25,12 @@
 .connection-info {
     display: flex;
     flex-direction: row;
+    align-self: center;
 }
 
 .connection-title {
     padding: 0 16px;
+    text-align: center;
 }
 
 .qrcode-container {
@@ -45,4 +47,22 @@
 .trace-button {
     float: right;
     margin-right: 20px;
+}
+
+#trace-card {
+    opacity: 0;
+    padding: 16px 16px;
+    transition: opacity .25s ease-in-out;
+    -webkit-transition: opacity .25s ease-in-out;
+    -moz-transition: opacity .25s ease-in-out;
+    -ms-transition: opacity .25s ease-in-out;
+    -o-transition: opacity .25s ease-in-out;
+}
+
+#trace-card.loaded-trace-results {
+    opacity: 1;
+}
+
+.trace-table {
+    width: 100%;
 }

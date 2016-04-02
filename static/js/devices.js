@@ -8,3 +8,18 @@ function fetch_devices(url, session_key){
         $("#devices").html(data);
     });
 }
+
+function perform_trace(url, formData){
+    console.log(url);
+    return $.ajax({
+        method: 'POST',
+        url: url,
+        data: formData
+    }).done(function(data, textStatus, jqXHR){
+        var resultsDiv = $("#trace-card");
+        resultsDiv.html(data);
+        if(!resultsDiv.hasClass('loaded-trace-results')){
+            resultsDiv.addClass('loaded-trace-results');
+        }
+    });
+}
