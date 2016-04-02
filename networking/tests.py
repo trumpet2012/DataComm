@@ -1,37 +1,40 @@
 from scapy.all import *
-import os
+import os, re
 #Test Here
 dst = 'fpvmodel.com'
-results = os.popen("traceroute %s -I" % dst).read()
-print results
-print "------------------------------------"
+results = os.popen("mtr -rwb4 %s " % dst).read()
+# print results
+# print "------------------------------------"
 lines = results.splitlines()
-header = lines.pop(0)
+# print lines
+header = lines.pop(0) + lines.pop(0)
 hop_list = []
 trace = {
     'target': {
         'original': dst,
-        'ip': header.split(dst)[1].split(',')[0].strip(' ()')
     },
     'results': hop_list
 }
-print header
+# print header
 linenumber = 1
 for line in lines:
-    pieces = line.split(' ')
-    if linenumber < 10:
-        domain = pieces[3]
-        ip = pieces[4].strip('()')
-    else:
-        domain = pieces[2]
-        ip = pieces[3].strip('()')
+    print line
+    response = True
+    matches = re.search(r'\-\-\s((?P<domain>[a-zA-Z0-9\.\-_?]*) (?P<ip>\(?[\d\.]*\)?)?)', line)
+    domain = matches.group('domain')
+    ip = matches.group('ip').strip('()')
 
-    if domain == '*':
-        domain = "No response"
-    if ip == '*':
-        ip = "No response"
+    if domain == '???':
+        domain = ''
+        response = False
+    elif ip == "":
+        # Sometimes the domain will be the IP address and the ip will be empty
+        tmp = domain
+        domain = ip
+        ip = tmp
 
     hop_list.append({
+        'response': response,
         'hop': linenumber,
         'domain': domain,
         'ip': ip
