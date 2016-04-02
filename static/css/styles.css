@@ -36,7 +36,6 @@
 .qrcode-container {
     display: flex;
     flex-direction: column;
-    padding-right: 16px;
 }
 
 .fa-qrcode {
@@ -50,19 +49,36 @@
 }
 
 #trace-card {
-    opacity: 0;
     padding: 16px 16px;
-    transition: opacity .25s ease-in-out;
-    -webkit-transition: opacity .25s ease-in-out;
-    -moz-transition: opacity .25s ease-in-out;
-    -ms-transition: opacity .25s ease-in-out;
-    -o-transition: opacity .25s ease-in-out;
 }
 
-#trace-card.loaded-trace-results {
+
+.fade {
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    -webkit-transition: opacity 1s ease-in-out;
+    -moz-transition: opacity 1s ease-in-out;
+    -ms-transition: opacity 1s ease-in-out;
+    -o-transition: opacity 1s ease-in-out;
+}
+
+.fade.fade-in {
     opacity: 1;
 }
 
 .trace-table {
     width: 100%;
+}
+
+#loading-trace {
+    width: 98%;
+    position: absolute;
+}
+
+#loading-text {
+    margin-top: 16px;
+}
+
+.not-visible {
+    display: none;
 }

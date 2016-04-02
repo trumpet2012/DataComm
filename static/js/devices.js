@@ -15,11 +15,5 @@ function perform_trace(url, formData){
         method: 'POST',
         url: url,
         data: formData
-    }).done(function(data, textStatus, jqXHR){
-        var resultsDiv = $("#trace-card");
-        resultsDiv.html(data);
-        if(!resultsDiv.hasClass('loaded-trace-results')){
-            resultsDiv.addClass('loaded-trace-results');
-        }
     });
 }

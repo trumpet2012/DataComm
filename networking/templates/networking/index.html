@@ -28,7 +28,7 @@
                     <div id="devices">
 
                     </div>
-                    <button class="mdl-button mdl-button-js mdl-color--green-400 trace-button">
+                    <button class="mdl-button mdl-button-js mdl-color--green-400 mdl-button--raised trace-button">
                         <i class="material-icons">device_hub</i>
                         Trace
                     </button>
@@ -36,9 +36,12 @@
             </div>
 
     </div>
-    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--12-col-tablet mdl-cell--12-col-desktop mdl-shadow--2dp card" id="trace-card">
-        <div id="trace-results">
-
+    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--12-col-tablet mdl-cell--12-col-desktop
+            mdl-shadow--2dp card fade" id="trace-card">
+        <div id="loading-trace" class="mdl-progress mdl-js-progress mdl-progress__indeterminate fade">
+            <h4 id="loading-text">Performing trace <span style="font-size: 12px;">(this may take a few moments)</span></h4>
+        </div>
+        <div id="trace-results" class="fade">
         </div>
     </div>
 {% endblock %}
@@ -50,6 +53,10 @@
         var device_url = "{% url 'device_listing' %}";
         var session_key = "{{ session_key }}";
         var material_js_url = "{% static 'js/material.min.js' %}";
+        var trace_card = $("#trace-card");
+        var resultsDiv = $("#trace-results");
+        var trace_loader = $("#loading-trace");
+
         fetch_devices(device_url, session_key);
         $('.refresh').on('click', function(){
             $('#devices').find('li').addClass('loading');
@@ -76,6 +83,7 @@
         var traceForm = $('form');
         var traceUrl = '{% url "trace" %}';
         traceForm.submit(function(event){
+
             var formData = traceForm.serializeArray();
             var formDict = {};
             $.each(formData, function(index, data){
@@ -92,7 +100,16 @@
                 }
             });
             console.log(formDict);
-            perform_trace(traceUrl, formData);
+
+            resultsDiv.removeClass('fade-in');
+            trace_card.addClass('fade-in');
+            trace_loader.addClass('fade-in');
+
+            perform_trace(traceUrl, formData).done(function(data, textStatus, jqXHR){
+                resultsDiv.html(data);
+                trace_loader.removeClass('fade-in');
+                resultsDiv.addClass('fade-in');
+            });
             event.preventDefault();
         });
     </script>
