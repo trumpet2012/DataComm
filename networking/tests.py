@@ -1,18 +1,46 @@
 from scapy.all import *
+import os, re
 #Test Here
+dst = 'fpvmodel.com'
+results = os.popen("mtr -rwb4 %s " % dst).read()
+# print results
+# print "------------------------------------"
+lines = results.splitlines()
+# print lines
+header = lines.pop(0) + lines.pop(0)
+hop_list = []
+trace = {
+    'target': {
+        'original': dst,
+    },
+    'results': hop_list
+}
+# print header
+linenumber = 1
+for line in lines:
+    print line
+    response = True
+    matches = re.search(r'\-\-\s((?P<domain>[a-zA-Z0-9\.\-_?]*) (?P<ip>\(?[\d\.]*\)?)?)', line)
+    domain = matches.group('domain')
+    ip = matches.group('ip').strip('()')
 
-hostname = "georgiasouthern.edu"
-for i in range(1, 28):
-    pkt = IP(dst=hostname, ttl=i) / UDP(dport=33434)
-    # Send the packet and get a reply
-    reply = sr1(pkt, verbose=0)
-    if reply is None:
-        # No reply =(
-        continue
-    elif reply.type == 3:
-        # We've reached our destination
-        print "Done!", reply.src
-        break
-    else:
-        # We're in the middle somewhere
-        print "%d hops away: " % i , reply.src
+    if domain == '???':
+        domain = ''
+        response = False
+    elif ip == "":
+        # Sometimes the domain will be the IP address and the ip will be empty
+        tmp = domain
+        domain = ip
+        ip = tmp
+
+    hop_list.append({
+        'response': response,
+        'hop': linenumber,
+        'domain': domain,
+        'ip': ip
+    })
+
+    print "Hop %s: %s %s" % (linenumber, domain, ip)
+    linenumber += 1
+
+print trace

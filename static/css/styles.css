@@ -29,17 +29,18 @@
 .connection-info {
     display: flex;
     flex-direction: row;
+    align-self: center;
 }
 
 .connection-title {
     padding: 0 16px;
+    text-align: center;
 }
 
 .qrcode-container {
     margin-top: 30px;
     display: flex;
     flex-direction: column;
-    padding-right: 16px;
 }
 
 .fa-qrcode {
@@ -50,4 +51,39 @@
 .trace-button {
     float: right;
     margin-right: 20px;
+}
+
+#trace-card {
+    padding: 16px 16px;
+}
+
+
+.fade {
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    -webkit-transition: opacity 1s ease-in-out;
+    -moz-transition: opacity 1s ease-in-out;
+    -ms-transition: opacity 1s ease-in-out;
+    -o-transition: opacity 1s ease-in-out;
+}
+
+.fade.fade-in {
+    opacity: 1;
+}
+
+.trace-table {
+    width: 100%;
+}
+
+#loading-trace {
+    width: 98%;
+    position: absolute;
+}
+
+#loading-text {
+    margin-top: 16px;
+}
+
+.not-visible {
+    display: none;
 }

@@ -1,24 +1,5 @@
 {% load staticfiles %}
-{#<script src="{% static 'css/material.min.css' %}"></script>#}
-
-<div class="device-header mdl-color--amber-600">
-    <h4 class="device-header-text">My Device</h4>
-</div>
-<ul class="mdl-list">
-    <li class="mdl-list__item">
-        <span class="mdl-list__item-primary-content">
-          <i class="material-icons  mdl-list__item-icon">devices</i>
-          {{ my.ip }}
-        </span>
-    </li>
-</ul>
-
-<div class="device-header mdl-color--amber-600">
-    <h4 class="device-header-text">Connected Devices</h4>
-    <button class="mdl-button mdl-js-button mdl-button--icon refresh">
-        <i class="material-icons">refresh</i>
-    </button>
-</div>
+<script href="{% static 'css/material.min.css' %}"></script>
 <ul class="mdl-list">
     {% for device in devices %}
     <li class="mdl-list__item">
@@ -28,7 +9,7 @@
         </span>
         <span class="mdl-list__item-secondary-action">
           <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="list-checkbox-{{ forloop.counter }}">
-              <input type="checkbox" id="list-checkbox-{{ forloop.counter }}" class="mdl-checkbox__input" value="{{ device.ip }}" />
+              <input type="checkbox" name="devices" id="list-checkbox-{{ forloop.counter }}" class="mdl-checkbox__input" value={{ device.id }} />
           </label>
         </span>
     </li>

@@ -3,7 +3,7 @@
 
 {% block content %}
 
-    <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp card">
+    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--3-col-tablet mdl-cell--4-col-desktop mdl-shadow--2dp card">
         <div class="mdl-layout-title connection-title">Session Information</div>
         <div class="connection-info">
             <div class="qrcode-container">
@@ -12,15 +12,36 @@
                 </div>
                 <input type="text" value="{{ connect_url }}" readonly/>
             </div>
-            <div class="device-listing">
-                <div id="devices">
+        </div>
+    </div>
+    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--5-col-tablet mdl-cell--8-col-desktop mdl-shadow--2dp card">
 
+            <div class="device-listing">
+                <div class="device-header mdl-color--amber-600">
+                    <h4 class="device-header-text">Devices</h4>
+                    <button class="mdl-button mdl-js-button mdl-button--icon refresh">
+                      <i class="material-icons">refresh</i>
+                    </button>
                 </div>
-                <button class="mdl-button mdl-button-js mdl-color--green-400 trace-button">
-                    <i class="material-icons">device_hub</i>
-                    Trace
-                </button>
+                <form id="trace-form">
+                    {% csrf_token %}
+                    <div id="devices">
+
+                    </div>
+                    <button class="mdl-button mdl-button-js mdl-color--green-400 mdl-button--raised trace-button">
+                        <i class="material-icons">device_hub</i>
+                        Trace
+                    </button>
+                </form>
             </div>
+
+    </div>
+    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--12-col-tablet mdl-cell--12-col-desktop
+            mdl-shadow--2dp card fade" id="trace-card">
+        <div id="loading-trace" class="mdl-progress mdl-js-progress mdl-progress__indeterminate fade">
+            <h4 id="loading-text">Performing trace <span style="font-size: 12px;">(this may take a few moments)</span></h4>
+        </div>
+        <div id="trace-results" class="fade">
         </div>
     </div>
 {% endblock %}
@@ -32,12 +53,11 @@
         var device_url = "{% url 'device_listing' %}";
         var session_key = "{{ session_key }}";
         var material_js_url = "{% static 'js/material.min.js' %}";
-        fetch_devices(device_url, session_key)
-            .done(function(data){
-                    // Reapply the MDL stylings that were lost after the ajax call.
-                    componentHandler.upgradeDom();
-                });
+        var trace_card = $("#trace-card");
+        var resultsDiv = $("#trace-results");
+        var trace_loader = $("#loading-trace");
 
+        fetch_devices(device_url, session_key);
         $('.refresh').on('click', function(){
             $('#devices').find('li').addClass('loading');
             var loading_text = $('<span>Loading...</span>');
@@ -57,15 +77,40 @@
                 .error(function(data){
                     $('#devices').find('li').removeClass('loading');
                     loading_text.remove();
-                })
+                });
         });
 
-        setInterval(function()
-            {fetch_devices(device_url, session_key)
-                .done(function(data){
-                    // Reapply the MDL stylings that were lost after the ajax call.
-                    componentHandler.upgradeDom();
-                });
-            }, 5000);
+        var traceForm = $('form');
+        var traceUrl = '{% url "trace" %}';
+        traceForm.submit(function(event){
+
+            var formData = traceForm.serializeArray();
+            var formDict = {};
+            $.each(formData, function(index, data){
+                console.log(data);
+                if (data.name in formDict){
+                    if (formDict[data.name].constructor == Array){
+                        formDict[data.name].append(data.value);
+                    } else {
+                        var oldResults = formDict[data.name];
+                        formDict[data.name] = [oldResults, data.value];
+                    }
+                }else{
+                    formDict[data.name] = data.value;
+                }
+            });
+            console.log(formDict);
+
+            resultsDiv.removeClass('fade-in');
+            trace_card.addClass('fade-in');
+            trace_loader.addClass('fade-in');
+
+            perform_trace(traceUrl, formData).done(function(data, textStatus, jqXHR){
+                resultsDiv.html(data);
+                trace_loader.removeClass('fade-in');
+                resultsDiv.addClass('fade-in');
+            });
+            event.preventDefault();
+        });
     </script>
 {% endblock scripts %}
