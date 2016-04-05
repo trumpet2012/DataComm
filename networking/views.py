@@ -27,6 +27,10 @@ def index(request):
         if connect_session is None:
             connect_session = Session.objects.create()
         device = Device.objects.create(ip=request.ip, session=connect_session)
+    else:
+        if connect_session is not None:
+            device.session = connect_session
+            device.save()
 
     connect_url = "http://%s?%s" % (request.META['HTTP_HOST'], urllib.urlencode({'session': device.session.key}))
     return render(request, 'networking/index.html', {

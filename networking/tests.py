@@ -1,4 +1,3 @@
-from scapy.all import *
 import os, re
 #Test Here
 dst = 'fpvmodel.com'
