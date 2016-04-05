@@ -1,2 +1,8 @@
-django==1.9.4
-django-ipware
+Django==1.9.4
+PyX==0.12.1
+argparse==1.2.1
+django-ipware==1.1.3
+django-qrcode==0.3
+pycrypto==2.6.1
+pygnuplot==1.7
+wsgiref==0.1.2
