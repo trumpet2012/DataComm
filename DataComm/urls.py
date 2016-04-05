@@ -19,9 +19,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from networking.views import index, device_listing, trace
 
-urlpatterns = static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + [
+urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^devices/', device_listing, name='device_listing'),
     url(r'^trace/', trace, name='trace'),
     url(r'', index, name='index')
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
