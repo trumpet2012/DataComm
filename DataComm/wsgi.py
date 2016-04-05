@@ -12,5 +12,4 @@ import os, sys
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "DataComm.settings")
-sys.path.insert(0, '/opt/python/current/app')
 application = get_wsgi_application()
