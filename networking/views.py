@@ -120,10 +120,11 @@ def trace_device(device):
     lines = results.splitlines()  # Seperate each line of the output into its own element in an array
     # Remove the first two lines since it is just the mtr header information
     hop_list = []
+    new_hop_list = []
     # Create the trace object that will hold the traceroute information
     trace = {
         'target': dst,
-        'results': hop_list
+        'results': new_hop_list
     }
 
     # Loop through each line in the string results, each line represents one hop
@@ -165,11 +166,18 @@ def trace_device(device):
 
     hop_counter = 1
     for hop in hop_list:
-        if hop['hop'] > hop_counter:
-            hop_list.insert(hop_counter-1, {
+        hop_difference = hop['hop'] - hop_counter
+        print "diff: %s" % hop_difference
+        for index_ctr in range(0, hop_difference):
+            print "hit loop: %s" % index_ctr
+            new_hop_list.append({
                 'response': False,
                 'hop': hop_counter,
                 'ip': 'No response'
             })
+            hop_counter += 1
+
+        new_hop_list.append(hop)
+        hop_counter += 1
 
     return trace
