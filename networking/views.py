@@ -1,11 +1,11 @@
 import urllib, os, re
-
+from urllib2 import Request, urlopen, URLError
 from operator import itemgetter
-
+import json
 from django.conf import settings
 from django.http import HttpResponse
+from django.http.response import JsonResponse
 from django.shortcuts import render
-
 from .models import Session, Device
 
 
@@ -43,6 +43,8 @@ def device_listing(request):
         get parameter.
     """
     devices = []
+    my = None
+
     connect_session_key = request.GET.get('session', None)
     if connect_session_key is not None:
         try:
@@ -50,10 +52,14 @@ def device_listing(request):
         except Session.DoesNotExist:
             pass
         else:
-            devices = Device.objects.filter(session=connect_session)
+            devices = Device.objects.filter(session=connect_session).exclude(ip=request.ip)
+            try:
+                my = Device.objects.get(session=connect_session, ip=request.ip)
+            except Device.DoesNotExist:
+                pass
 
     return render(request, 'networking/device_listing.html', context={
-        'devices': devices
+        'devices': devices, 'my': my
     })
 
 
@@ -128,13 +134,36 @@ def trace_device(device):
         hop_number = int(hop_number)
         hop_number += 1
 
+        #Get additional information on individual hop through GeoIP API
+        try:
+
+            traceurl = 'http://geoip.nekudo.com/api/8.8.8.8/en/short'
+            tracerequest = Request(traceurl)
+            inforesponse = urlopen(tracerequest)
+            stringinfo = json.loads(inforesponse.read())
+
+            latitude = stringinfo['location']['latitude']
+            longitude = stringinfo['location']['longitude']
+            city = stringinfo['city']
+            country = stringinfo['country']['name']
+            timezone = stringinfo['location']['time_zone']
+
+        except URLError, e:
+            print 'No kittez. Got an error code:', e
+
         hop_list.append({
             'response': True,
             'hop': hop_number,
-            'ip': ip
+            'ip': ip,
+            'city': city,
+            'country': country,
+            'timezone': timezone,
+            'latitude': latitude,
+            'longitude': longitude
         })
 
     hop_list = sorted(hop_list, key=itemgetter('hop'))
+
 
     hop_counter = 1
     for hop in hop_list:

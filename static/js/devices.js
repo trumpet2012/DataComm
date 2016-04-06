@@ -4,8 +4,10 @@ function fetch_devices(url, session_key){
         data: {
             session: session_key
         }
+
     }).done(function(data, textStatus, jqXHR){
         $("#devices").html(data);
+
     });
 }
 

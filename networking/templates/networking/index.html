@@ -17,12 +17,6 @@
     <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--5-col-tablet mdl-cell--8-col-desktop mdl-shadow--2dp card">
 
             <div class="device-listing">
-                <div class="device-header mdl-color--amber-600">
-                    <h4 class="device-header-text">Devices</h4>
-                    <button class="mdl-button mdl-js-button mdl-button--icon refresh">
-                      <i class="material-icons">refresh</i>
-                    </button>
-                </div>
                 <form id="trace-form">
                     {% csrf_token %}
                     <div id="devices">
@@ -71,7 +65,7 @@
         var resultsDiv = $("#trace-results");
         var trace_loader = $("#loading-trace");
 
-        fetch_devices(device_url, session_key);
+        fetch_devices(device_url, session_key)
         $('.refresh').on('click', function(){
             $('#devices').find('li').addClass('loading');
             var loading_text = $('<span>Loading...</span>');
@@ -93,6 +87,18 @@
                     loading_text.remove();
                 });
         });
+        setInterval(function(){
+            fetch_devices(device_url, session_key)
+                .done(function(data){
+                    // Reapply the MDL stylings that were lost after the ajax call.
+                    componentHandler.upgradeDom();
+                })
+                .error(function(data){
+                    $('#devices').find('li').removeClass('loading');
+                    loading_text.remove();
+                });
+        }, 5000);
+
 
         var traceForm = $('form');
         var traceUrl = '{% url "trace" %}';
