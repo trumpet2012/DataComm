@@ -1,21 +1,72 @@
+{% load staticfiles %}
+
+<link href="/static/css/dropdown.css" type="text/css" rel="stylesheet"/>
+
 {% for trace in traces.list %}
     <h4>Trace to {{ trace.target }}</h4>
     <table class="mdl-data-table mdl-js-data-table trace-table">
       <thead>
         <tr>
           <th class="mdl-data-table__cell--non-numeric">Hop</th>
-          <th class="mdl-data-table__cell--non-numeric">Domain</th>
           <th class="mdl-data-table__cell--non-numeric">IP</th>
+            <th class="mdl-data-table__cell--non-numeric">Hop Details</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody >
         {% for hop in trace.results %}
             <tr>
               <td class="mdl-data-table__cell--non-numeric">{{ hop.hop }}</td>
-              <td class="mdl-data-table__cell--non-numeric">{{ hop.domain }}</td>
               <td class="mdl-data-table__cell--non-numeric">{{ hop.ip }}</td>
+                <td class="mdl-data-table__cell--non-numeric">
+                    <div id="tracert">
+                        <ul>
+                            <li class="container" >
+                                <input type="checkbox" id={{ hop.hop }}>
+                                <label for={{ hop.hop }}></label>
+                                <ul>
+                                    <li class="mdl-list__item">Country: {{ hop.country }}</li>
+                                    <li class="mdl-list__item">City: {{ hop.city }}</li>
+                                    <li class="mdl-list__item">Timezone: {{ hop.timezone }}</li>
+                                    <li class="mdl-list__item">Latitude: {{ hop.latitude }}</li>
+                                    <li class="mdl-list__item">Longitude: {{ hop.longitude }}</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
             </tr>
         {% endfor %}
       </tbody>
     </table>
+{##}
+{#    <h4>Hop Details</h4>#}
+{#    <table class="mdl-data-table mdl-js-data-table trace-table">#}
+{#      <thead>#}
+{#        <tr>#}
+{#            <th class="mdl-data-table__cell--non-numeric">Hop</th>#}
+{#            <th class="mdl-data-table__cell--non-numeric">Country</th>#}
+{#            <th class="mdl-data-table__cell--non-numeric">City</th>#}
+{#            <th class="mdl-data-table__cell--non-numeric">Timezone</th>#}
+{#            <th class="mdl-data-table__cell--non-numeric">Latitude</th>#}
+{#            <th class="mdl-data-table__cell--non-numeric">Longitude</th>#}
+{#        </tr>#}
+{#      </thead>#}
+{#      <tbody>#}
+{#        {% for hop in trace.results %}#}
+{#            <tr>#}
+{#              <td class="mdl-data-table__cell--non-numeric">{{ hop.hop }}</td>#}
+{#              <td class="mdl-data-table__cell--non-numeric">{{ hop.country }}</td>#}
+{#              <td class="mdl-data-table__cell--non-numeric">{{ hop.city }}</td>#}
+{#              <td class="mdl-data-table__cell--non-numeric">{{ hop.timezone }}</td>#}
+{#              <td class="mdl-data-table__cell--non-numeric">{{ hop.latitude }}</td>#}
+{#              <td class="mdl-data-table__cell--non-numeric">{{ hop.longitude}}</td>#}
+{#            </tr>#}
+{#        {% endfor %}#}
+{#      </tbody>#}
+{#    </table>#}
+
 {% endfor %}
+
+
+
+

@@ -1,17 +1,15 @@
 import urllib, os, re
-
+from urllib2 import Request, urlopen, URLError
 from operator import itemgetter
-
+import json
+from django.conf import settings
 from django.http import HttpResponse
+from django.http.response import JsonResponse
 from django.shortcuts import render
-
 from .models import Session, Device
 
 
 def index(request):
-    # ans = sr1(IP(dst="www.google.com", ttl=(1,10))/ICMP(), timeout=10)
-    # print ans
-    # summary = ans.summary(lambda(s, r): r.sprintf("%IP.src\t{ICMP:%ICMP.type%}\t{TCP:%TCP.flags%}"))
 
     connect_session_key = request.GET.get('session', None)
     connect_session = None
@@ -27,6 +25,10 @@ def index(request):
         if connect_session is None:
             connect_session = Session.objects.create()
         device = Device.objects.create(ip=request.ip, session=connect_session)
+    else:
+        if connect_session is not None:
+            device.session = connect_session
+            device.save()
 
     connect_url = "http://%s?%s" % (request.META['HTTP_HOST'], urllib.urlencode({'session': device.session.key}))
     return render(request, 'networking/index.html', {
@@ -41,6 +43,8 @@ def device_listing(request):
         get parameter.
     """
     devices = []
+    my = None
+
     connect_session_key = request.GET.get('session', None)
     if connect_session_key is not None:
         try:
@@ -48,10 +52,14 @@ def device_listing(request):
         except Session.DoesNotExist:
             pass
         else:
-            devices = Device.objects.filter(session=connect_session)
+            devices = Device.objects.filter(session=connect_session).exclude(ip=request.ip)
+            try:
+                my = Device.objects.get(session=connect_session, ip=request.ip)
+            except Device.DoesNotExist:
+                pass
 
     return render(request, 'networking/device_listing.html', context={
-        'devices': devices
+        'devices': devices, 'my': my
     })
 
 
@@ -105,42 +113,72 @@ def trace_device(device):
     :return a dictionary containing the results of the trace.
     """
     dst = device.ip
-    results = os.popen("mtr -rwb4 %s " % dst).read()  # Run the mtr command and capture the stdout
+    sudo_command = ''
+    if settings.IN_PRODUCTION:
+        sudo_command = 'sudo '
+    results = os.popen("%smtr -l %s | grep '^h'" % (sudo_command, dst)).read()  # Run the mtr command and capture the stdout
     lines = results.splitlines()  # Seperate each line of the output into its own element in an array
     # Remove the first two lines since it is just the mtr header information
-    lines.pop(0) + lines.pop(0)
     hop_list = []
+    new_hop_list = []
     # Create the trace object that will hold the traceroute information
     trace = {
         'target': dst,
-        'results': hop_list
+        'results': new_hop_list
     }
-    linenumber = 1
+
     # Loop through each line in the string results, each line represents one hop
     for line in lines:
-        response = True
-        # Parse the hop line information to get the domain and ip address
-        matches = re.search(r'\-\-\s((?P<domain>[a-zA-Z0-9\.\-_?]*) (?P<ip>\(?[\d\.]*\)?)?)', line)
-        domain = matches.group('domain')
-        ip = matches.group('ip').strip('()')
+        line_type, hop_number, ip = line.split(' ')
 
-        if domain == '???':
-            domain = ""
-            response = False
-        elif ip == "":
-            # Sometimes the domain will contain the IP address and ip will be empty
-            # This only happens when the domain has a value and ip does not.
-            # We switch their values to fix this.
-            tmp = domain
-            domain = ip
-            ip = tmp
+        hop_number = int(hop_number)
+        hop_number += 1
+
+        #Get additional information on individual hop through GeoIP API
+        try:
+
+            traceurl = 'http://geoip.nekudo.com/api/8.8.8.8/en/short'
+            tracerequest = Request(traceurl)
+            inforesponse = urlopen(tracerequest)
+            stringinfo = json.loads(inforesponse.read())
+
+            latitude = stringinfo['location']['latitude']
+            longitude = stringinfo['location']['longitude']
+            city = stringinfo['city']
+            country = stringinfo['country']['name']
+            timezone = stringinfo['location']['time_zone']
+
+        except URLError, e:
+            print 'No kittez. Got an error code:', e
 
         hop_list.append({
-            'response': response,
-            'hop': linenumber,
-            'domain': domain,
-            'ip': ip
+            'response': True,
+            'hop': hop_number,
+            'ip': ip,
+            'city': city,
+            'country': country,
+            'timezone': timezone,
+            'latitude': latitude,
+            'longitude': longitude
         })
 
-        linenumber += 1
+    hop_list = sorted(hop_list, key=itemgetter('hop'))
+
+
+    hop_counter = 1
+    for hop in hop_list:
+        hop_difference = hop['hop'] - hop_counter
+        print "diff: %s" % hop_difference
+        for index_ctr in range(0, hop_difference):
+            print "hit loop: %s" % index_ctr
+            new_hop_list.append({
+                'response': False,
+                'hop': hop_counter,
+                'ip': 'No response'
+            })
+            hop_counter += 1
+
+        new_hop_list.append(hop)
+        hop_counter += 1
+
     return trace
