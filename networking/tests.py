@@ -44,3 +44,4 @@ for line in lines:
     linenumber += 1
 
 print trace
+
