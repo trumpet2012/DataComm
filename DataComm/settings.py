@@ -79,10 +79,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'DataComm.wsgi.application'
 
+IN_PRODUCTION = False
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 if 'RDS_HOSTNAME' in os.environ:
+    IN_PRODUCTION = True
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',

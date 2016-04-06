@@ -4,7 +4,6 @@
       <thead>
         <tr>
           <th class="mdl-data-table__cell--non-numeric">Hop</th>
-          <th class="mdl-data-table__cell--non-numeric">Domain</th>
           <th class="mdl-data-table__cell--non-numeric">IP</th>
         </tr>
       </thead>
@@ -12,7 +11,6 @@
         {% for hop in trace.results %}
             <tr>
               <td class="mdl-data-table__cell--non-numeric">{{ hop.hop }}</td>
-              <td class="mdl-data-table__cell--non-numeric">{{ hop.domain }}</td>
               <td class="mdl-data-table__cell--non-numeric">{{ hop.ip }}</td>
             </tr>
         {% endfor %}
