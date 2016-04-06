@@ -134,7 +134,7 @@ def trace_device(device):
         hop_number = int(hop_number)
         hop_number += 1
 
-        # Get additional information on individual hop through GeoIP API
+        #Get additional information on individual hop through GeoIP API
         try:
 
             traceurl = 'http://geoip.nekudo.com/api/8.8.8.8/en/short'
@@ -163,6 +163,7 @@ def trace_device(device):
         })
 
     hop_list = sorted(hop_list, key=itemgetter('hop'))
+
 
     hop_counter = 1
     for hop in hop_list:
