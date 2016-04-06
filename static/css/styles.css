@@ -82,3 +82,11 @@
 .not-visible {
     display: none;
 }
+
+#map {
+    width: 500px;
+    height: 400px;
+    background-color: #CCC;
+    margin-right: auto;
+    margin-left: auto;
+  }
