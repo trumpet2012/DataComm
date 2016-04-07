@@ -104,3 +104,11 @@
 #map-results {
     height: 600px;
 }
+
+.device-list-item {
+    flex-wrap: wrap;
+}
+
+.device-list-name {
+    margin: auto;
+}

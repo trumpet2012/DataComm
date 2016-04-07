@@ -57,10 +57,12 @@
         var trace_card = $("#trace-card");
         var resultsDiv = $("#trace-results");
         var trace_loader = $("#loading-trace");
+        var traceForm = $('form');
+        var traceUrl = '{% url "trace" %}';
         var map_card = $("#map-card");
         var map;
 
-        fetch_devices(device_url, session_key)
+        submit_form(device_url, traceForm.serializeArray())
             .done(function(data){
                 updateDeviceListing(data);
             })
@@ -68,64 +70,34 @@
                 $('#devices').find('li').removeClass('loading');
                 loading_text.remove();
             });
-        $('.refresh').on('click', function(){
-            $('#devices').find('li').addClass('loading');
-            var loading_text = $('<span>Loading...</span>');
-            loading_text.css({
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                'text-align': 'center',
-                top: '50%',
-                opacity: 1
-            }).appendTo(device_listing_div);
-            fetch_devices(device_url, session_key)
+        device_listing_div.on('click', '.refresh', function(event){
+            submit_form(device_url, $('form').serializeArray())
                 .done(function(data){
                     updateDeviceListing(data);
-                })
-                .error(function(data){
-                    $('#devices').find('li').removeClass('loading');
-                    loading_text.remove();
                 });
         });
         setInterval(function(){
-            fetch_devices(device_url, session_key)
-                .done(function (data) {
-                    updateDeviceListing(data);
-                })
-                .error(function (data) {
-                    $('#devices').find('li').removeClass('loading');
-                    loading_text.remove();
-                });
+            if(!$('#deviceName').is(':focus')){
+                submit_form(device_url, $('form').serializeArray())
+                    .done(function (data) {
+                        updateDeviceListing(data);
+                    })
+                    .error(function (data) {
+                        $('#devices').find('li').removeClass('loading');
+                        loading_text.remove();
+                    });
+            }
         }, 5000);
 
-
-        var traceForm = $('form');
-        var traceUrl = '{% url "trace" %}';
-        traceForm.submit(function(event){
+        $('.trace-button').click(function(event){
 
             var formData = traceForm.serializeArray();
-            var formDict = {};
-            $.each(formData, function(index, data){
-                console.log(data);
-                if (data.name in formDict){
-                    if (formDict[data.name].constructor == Array){
-                        formDict[data.name].append(data.value);
-                    } else {
-                        var oldResults = formDict[data.name];
-                        formDict[data.name] = [oldResults, data.value];
-                    }
-                }else{
-                    formDict[data.name] = data.value;
-                }
-            });
-            console.log(formDict);
 
             resultsDiv.removeClass('fade-in');
             trace_card.addClass('fade-in');
             trace_loader.addClass('fade-in');
 
-            perform_trace(traceUrl, formData).done(function(data, textStatus, jqXHR){
+            submit_form(traceUrl, formData).done(function(data, textStatus, jqXHR){
                 resultsDiv.html(data);
                 trace_loader.removeClass('fade-in');
                 resultsDiv.addClass('fade-in');

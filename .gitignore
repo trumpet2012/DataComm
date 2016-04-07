@@ -1,6 +1,7 @@
 .idea
 db.sqlite3
 */__pycache__/*
+*.pyc
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

@@ -1,15 +1,5 @@
-function fetch_devices(url, session_key){
-    return $.ajax({
-        url: url,
-        data: {
-            session: session_key
-        }
-
-    });
-}
-
-function perform_trace(url, formData){
-    console.log(url);
+function submit_form(url, formData){
+    console.log(formData);
     return $.ajax({
         method: 'POST',
         url: url,

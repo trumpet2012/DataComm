@@ -44,7 +44,10 @@ def device_listing(request):
     devices = []
     my = None
 
-    connect_session_key = request.GET.get('session', None)
+    connect_session_key = request.POST.get('session', None)
+    device_name = request.POST.get('deviceName', None)
+    print request.POST
+
     if connect_session_key is not None:
         try:
             connect_session = Session.objects.get(key=connect_session_key)
@@ -56,6 +59,13 @@ def device_listing(request):
                 my = Device.objects.get(session=connect_session, ip=request.ip)
             except Device.DoesNotExist:
                 pass
+    else:
+        my = Device.objects.get(ip=request.ip)
+        devices = Device.objects.filter(session=my.session).exclude(ip=request.ip)
+
+    if device_name is not None and not my.name == device_name:
+        my.name = device_name
+        my.save()
 
     return render(request, 'networking/device_listing.html', context={
         'devices': devices, 'my': my
