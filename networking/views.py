@@ -41,12 +41,16 @@ def device_listing(request):
         Ajax view for listing all devices attached to the specified session. Session key must be passed as a
         get parameter.
     """
-    devices = []
-    my = None
-
     connect_session_key = request.POST.get('session', None)
     device_name = request.POST.get('deviceName', None)
-    print request.POST
+    my_device_ip = request.POST.get('myDeviceIp', request.ip)
+
+    device_kwargs = {
+        'ip': my_device_ip,
+        'defaults': {
+            'name': device_name,
+        },
+    }
 
     if connect_session_key is not None:
         try:
@@ -54,21 +58,22 @@ def device_listing(request):
         except Session.DoesNotExist:
             pass
         else:
-            devices = Device.objects.filter(session=connect_session).exclude(ip=request.ip)
-            try:
-                my = Device.objects.get(session=connect_session, ip=request.ip)
-            except Device.DoesNotExist:
-                pass
-    else:
-        my = Device.objects.get(ip=request.ip)
-        devices = Device.objects.filter(session=my.session).exclude(ip=request.ip)
+            device_kwargs['session'] = connect_session
 
-    if device_name is not None and not my.name == device_name:
-        my.name = device_name
-        my.save()
+    current_device, created = Device.objects.get_or_create(**device_kwargs)
+
+    if not created and not current_device.ip == request.ip:
+        current_device.ip = request.ip
+
+    if device_name is not None and not current_device.name == device_name:
+        current_device.name = device_name
+
+    current_device.save()
+
+    devices = Device.objects.filter(session=current_device.session).exclude(ip=my_device_ip)
 
     return render(request, 'networking/device_listing.html', context={
-        'devices': devices, 'my': my
+        'devices': devices, 'current_device': current_device
     })
 
 

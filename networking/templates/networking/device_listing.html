@@ -8,9 +8,10 @@
     <li class="mdl-list__item">
         <div class="mdl-list__item-primary-content device-list-item">
             <i class="material-icons  mdl-list__item-icon">devices</i>
-            <div>{{ my.ip }}</div>
+            <div>{{ current_device.ip }}</div>
+            <input type="hidden" name="myDeviceIp" value="{{ current_device.ip }}">
             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label device-list-name">
-                <input class="mdl-textfield__input" name="deviceName" type="text" id="deviceName" value="{{ my.name }}">
+                <input class="mdl-textfield__input" name="deviceName" type="text" id="deviceName" value="{{ current_device.name }}">
                 <label class="mdl-textfield__label" for="deviceName">Device name</label>
             </div>
         </div>
