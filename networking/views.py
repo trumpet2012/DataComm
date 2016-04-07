@@ -1,10 +1,9 @@
-import urllib, os, re
+import urllib, os
 from urllib2 import Request, urlopen, URLError
 from operator import itemgetter
 import json
 from django.conf import settings
 from django.http import HttpResponse
-from django.http.response import JsonResponse
 from django.shortcuts import render
 from .models import Session, Device
 
@@ -115,10 +114,8 @@ def trace_device(device):
     dst = device.ip
     sudo_command = ''
     if settings.IN_PRODUCTION:
-        print "In Production: %s" % settings.IN_PRODUCTION
         sudo_command = 'sudo '
     results = os.popen("%smtr -l %s | grep '^h'" % (sudo_command, dst)).read()  # Run the mtr command and capture the stdout
-    print "User: %s" % (os.popen("whoami").read())
     lines = results.splitlines()  # Seperate each line of the output into its own element in an array
     # Remove the first two lines since it is just the mtr header information
     hop_list = []
@@ -170,9 +167,7 @@ def trace_device(device):
     hop_counter = 1
     for hop in hop_list:
         hop_difference = hop['hop'] - hop_counter
-        print "diff: %s" % hop_difference
         for index_ctr in range(0, hop_difference):
-            print "hit loop: %s" % index_ctr
             new_hop_list.append({
                 'response': False,
                 'hop': hop_counter,
