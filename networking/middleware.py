@@ -9,4 +9,3 @@ class IpMiddleware:
             ip = get_ip(request=request)
 
         request.ip = ip
-        print("IP: %s" % request.ip)
