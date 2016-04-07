@@ -101,7 +101,7 @@ def trace(request):
         traces_list.append(trace)
 
     return render(request, 'networking/trace_results.html', context={
-        'traces': traces
+        'tracesjson':   json.dumps(traces), 'traces': traces
     })
 
 

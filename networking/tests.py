@@ -1,5 +1,4 @@
 # NECESSARY FIXES
-# CSS - don't apply after trace on to devices
 # Refresh button needs to not perform trace
 # Needs to be mobile friendly
 

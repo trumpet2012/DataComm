@@ -100,3 +100,7 @@
     margin-right: auto;
     margin-left: auto;
   }
+
+#map-results {
+    height: 600px;
+}
