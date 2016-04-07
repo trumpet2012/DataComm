@@ -62,13 +62,12 @@
 
         fetch_devices(device_url, session_key)
             .done(function(data){
-                    // Reapply the MDL stylings that were lost after the ajax call.
-                    componentHandler.upgradeDom();
-                })
-                .error(function(data){
-                    $('#devices').find('li').removeClass('loading');
-                    loading_text.remove();
-                });
+                updateDeviceListing(data);
+            })
+            .error(function(data){
+                $('#devices').find('li').removeClass('loading');
+                loading_text.remove();
+            });
         $('.refresh').on('click', function(){
             $('#devices').find('li').addClass('loading');
             var loading_text = $('<span>Loading...</span>');
@@ -82,8 +81,7 @@
             }).appendTo(device_listing_div);
             fetch_devices(device_url, session_key)
                 .done(function(data){
-                    // Reapply the MDL stylings that were lost after the ajax call.
-                    componentHandler.upgradeDom();
+                    updateDeviceListing(data);
                 })
                 .error(function(data){
                     $('#devices').find('li').removeClass('loading');
@@ -92,11 +90,10 @@
         });
         setInterval(function(){
             fetch_devices(device_url, session_key)
-                .done(function(data){
-                    // Reapply the MDL stylings that were lost after the ajax call.
-                    componentHandler.upgradeDom();
+                .done(function (data) {
+                    updateDeviceListing(data);
                 })
-                .error(function(data){
+                .error(function (data) {
                     $('#devices').find('li').removeClass('loading');
                     loading_text.remove();
                 });
@@ -147,6 +144,19 @@
             var mapDiv = document.getElementById('map-results');
             map = new google.maps.Map(mapDiv, opt);
         }
+
+    function updateDeviceListing(data){
+        data = $(data);
+        var form_fields = traceForm.serializeArray();
+        $.each(form_fields, function(index, field){
+            if (field.name == "devices") {
+                data.find('input[name="devices"][value="' + field.value + '"]').attr('checked', true);
+            }
+        });
+        $("#devices").html(data);
+        // Reapply the MDL stylings that were lost after the ajax call.
+        componentHandler.upgradeDom();
+    }
 
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script>
