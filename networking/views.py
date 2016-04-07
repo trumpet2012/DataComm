@@ -118,6 +118,7 @@ def trace_device(device):
         print "In Production: %s" % settings.IN_PRODUCTION
         sudo_command = 'sudo '
     results = os.popen("%smtr -l %s | grep '^h'" % (sudo_command, dst)).read()  # Run the mtr command and capture the stdout
+    print "User: %s" % (os.popen("whoami").read())
     lines = results.splitlines()  # Seperate each line of the output into its own element in an array
     # Remove the first two lines since it is just the mtr header information
     hop_list = []
