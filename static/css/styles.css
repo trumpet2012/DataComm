@@ -112,3 +112,19 @@
 .device-list-name {
     margin: auto;
 }
+
+@media (max-width: 495px) {
+    .mdl-list__item {
+        flex-wrap: wrap;
+        flex-direction: column;
+    }
+    .device-listing-text {
+        margin-top: 16px;
+    }
+    .mdl-list__item-secondary-action {
+        align-self: flex-end;
+    }
+    .device-list-name {
+        font-weight: 300;
+    }
+}
