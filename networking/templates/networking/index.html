@@ -67,13 +67,9 @@
         var directionsService;
 
         submit_form(device_url, traceForm.serializeArray())
-                .done(function (data) {
-                    updateDeviceListing(data);
-                })
-                .error(function (data) {
-                    $('#devices').find('li').removeClass('loading');
-                    loading_text.remove();
-                });
+            .done(function (data) {
+                updateDeviceListing(data);
+            });
 
         device_listing_div.on('click', '.refresh', function (event) {
             submit_form(device_url, $('form').serializeArray())
@@ -89,13 +85,9 @@
         setInterval(function () {
             if (!$('#deviceName').is(':focus')) {
                 submit_form(device_url, $('form').serializeArray())
-                        .done(function (data) {
-                            updateDeviceListing(data);
-                        })
-                        .error(function (data) {
-                            $('#devices').find('li').removeClass('loading');
-                            loading_text.remove();
-                        });
+                    .done(function (data) {
+                        updateDeviceListing(data);
+                    });
             }
         }, 5000);
 
@@ -108,6 +100,7 @@
             trace_loader.addClass('fade-in');
 
             submit_form(traceUrl, formData).done(function (data, textStatus, jqXHR) {
+                resultsDiv.html(data);
                 var source_ip = $('input[name="myDeviceIp"]').val();
                 var routes = tracedata.list;
                 $.each(routes, function (route_index, route) {
@@ -146,7 +139,6 @@
                     });
 
                 });
-                resultsDiv.html(data);
                 trace_loader.removeClass('fade-in');
                 resultsDiv.addClass('fade-in');
                 map_card.addClass('fade-in');
