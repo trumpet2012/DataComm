@@ -7,8 +7,5 @@ class IpMiddleware:
         ip = get_real_ip(request)
         if ip is None:
             ip = get_ip(request=request)
-            print "Non real IP: %s" % ip
-        else:
-            print "Real IP: %s" % ip
 
         request.ip = ip

@@ -160,6 +160,7 @@ def trace_device(device):
             tracerequest = Request(traceurl)
             inforesponse = urlopen(tracerequest)
             stringinfo = json.loads(inforesponse.read())
+            print "Response: %s" % stringinfo
 
             latitude = stringinfo['location']['latitude']
             longitude = stringinfo['location']['longitude']
