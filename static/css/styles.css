@@ -114,17 +114,21 @@
 }
 
 @media (max-width: 495px) {
-    .mdl-list__item {
+    .target-device-list .mdl-list__item {
         flex-wrap: wrap;
         flex-direction: column;
+        border-bottom: gainsboro 1px solid;
     }
-    .device-listing-text {
+    .target-device-list .device-listing-text {
         margin-top: 16px;
     }
-    .mdl-list__item-secondary-action {
+    .target-device-list .mdl-list__item-secondary-action {
         align-self: flex-end;
     }
-    .device-list-name {
+    .target-device-list .device-list-name {
         font-weight: 300;
+    }
+    .target-device-list .device-list-item {
+        width: 100%;
     }
 }
