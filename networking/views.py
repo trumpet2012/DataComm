@@ -161,12 +161,17 @@ def trace_device(device):
             inforesponse = urlopen(tracerequest)
             stringinfo = json.loads(inforesponse.read())
             print "Response: %s" % stringinfo
-
-            latitude = stringinfo['location']['latitude']
-            longitude = stringinfo['location']['longitude']
-            city = stringinfo['city']
-            country = stringinfo['country']['name']
-            timezone = stringinfo['location']['time_zone']
+            message_type = stringinfo.get('type')
+            message = stringinfo.get('msg')
+            if message_type == 'error':
+                print "Error getting location information[%s]: %s" % (ip, message)
+                latitude = longitude = city = country = timezone = ""
+            else:
+                latitude = stringinfo['location']['latitude']
+                longitude = stringinfo['location']['longitude']
+                city = stringinfo['city']
+                country = stringinfo['country']['name']
+                timezone = stringinfo['location']['time_zone']
 
         except URLError, e:
             print 'No kittez. Got an error code:', e
