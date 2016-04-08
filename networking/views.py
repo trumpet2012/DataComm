@@ -99,9 +99,14 @@ def trace(request):
     source_hops = source_trace.get('results')
     num_source_hops = len(source_hops)
 
+    for hop_counter in range(0, num_source_hops):
+        # Loop through and flip all of the hop numbers so that we effectively reverse
+        # the perspective of the traceroute
+        source_hops[hop_counter]['hop'] = num_source_hops - hop_counter
+
     for device in target_devices:
-        trace = trace_device(device=device)
-        node_list = trace.get('results')
+        device_trace = trace_device(device=device)
+        node_list = device_trace.get('results')
         for node in node_list:
             # Increment all of the hop numbers in the destination trace
             # since we are about to add the source trace to the beginning
@@ -109,10 +114,11 @@ def trace(request):
 
         # Add the source trace to the beginning of the destination trace
         node_list.extend(source_hops)
+
         # Sort the list by the hop number
-        trace['results'] = sorted(node_list, key=itemgetter('hop'))
+        device_trace['results'] = sorted(node_list, key=itemgetter('hop'))
         # Add this trace result to the list of traces being performed.
-        traces_list.append(trace)
+        traces_list.append(device_trace)
 
     return render(request, 'networking/trace_results.html', context={
         'tracesjson':   json.dumps(traces), 'traces': traces
