@@ -26,6 +26,7 @@
                         <i class="material-icons">device_hub</i>
                         Trace
                     </button>
+                    <input type="hidden" name="session" value="{{ session_key }}">
                 </form>
             </div>
 
@@ -52,7 +53,7 @@
     <script>
         var device_listing_div = $('#devices');
         var device_url = "{% url 'device_listing' %}";
-        var session_key = "{{ session_key }}";
+        var delete_url = "{% url 'device_delete' %}";
         var material_js_url = "{% static 'js/material.min.js' %}";
         var trace_card = $("#trace-card");
         var resultsDiv = $("#trace-results");
@@ -75,6 +76,9 @@
                 .done(function(data){
                     updateDeviceListing(data);
                 });
+        });
+        device_listing_div.on('click', '.delete', function(event){
+            submit_form(delete_url, $('form').serializeArray());
         });
         setInterval(function(){
             if(!$('#deviceName').is(':focus')){

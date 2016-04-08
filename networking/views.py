@@ -200,3 +200,18 @@ def trace_device(device):
         hop_counter += 1
 
     return trace
+
+
+def delete_devices(request):
+    device_ids = request.POST.getlist('devices', [])
+    connect_session_key = request.POST.get('session', None)
+
+    devices_to_delete = None
+    if connect_session_key is not None:
+        devices_to_delete = Device.objects.filter(pk__in=device_ids, session__key=connect_session_key)
+    else:
+        devices_to_delete = Device.objects.filter(pk__in=device_ids)
+
+    devices_to_delete.delete()
+
+    return HttpResponse("Success")
