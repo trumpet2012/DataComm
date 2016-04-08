@@ -3,6 +3,7 @@ from urllib2 import Request, urlopen, URLError
 from operator import itemgetter
 import json
 from django.conf import settings
+from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import render
 from .models import Session, Device
@@ -51,7 +52,7 @@ def device_listing(request):
             'name': device_name,
         },
     }
-
+    connect_session = None
     if connect_session_key is not None:
         try:
             connect_session = Session.objects.get(key=connect_session_key)
@@ -68,7 +69,14 @@ def device_listing(request):
     if device_name is not None and not current_device.name == device_name:
         current_device.name = device_name
 
-    current_device.save()
+    try:
+        current_device.save()
+    except IntegrityError:
+        current_device = Device.objects.get(ip=request.ip)
+
+        if connect_session:
+            current_device.session = connect_session
+            current_device.save()
 
     devices = Device.objects.filter(session=current_device.session).exclude(ip=my_device_ip)
 
