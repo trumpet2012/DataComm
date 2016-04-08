@@ -156,8 +156,7 @@ def trace_device(device):
 
         #Get additional information on individual hop through GeoIP API
         try:
-
-            traceurl = 'http://geoip.nekudo.com/api/8.8.8.8/en/short'
+            traceurl = 'http://geoip.nekudo.com/api/%s/en/short' % ip
             tracerequest = Request(traceurl)
             inforesponse = urlopen(tracerequest)
             stringinfo = json.loads(inforesponse.read())
@@ -206,7 +205,6 @@ def delete_devices(request):
     device_ids = request.POST.getlist('devices', [])
     connect_session_key = request.POST.get('session', None)
 
-    devices_to_delete = None
     if connect_session_key is not None:
         devices_to_delete = Device.objects.filter(pk__in=device_ids, session__key=connect_session_key)
     else:
