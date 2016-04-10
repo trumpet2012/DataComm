@@ -10,48 +10,43 @@
                 <div class="fa-qrcode">
                     {% qr_from_text connect_url %}
                 </div>
-                <input type="text" value="{{ connect_url }}" readonly/>
+                <input type="text" value="{{ connect_url }}" readonly>
             </div>
         </div>
     </div>
     <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--5-col-tablet mdl-cell--8-col-desktop mdl-shadow--2dp card">
 
-            <div class="device-listing">
-                <form id="trace-form">
-                    {% csrf_token %}
-                    <div id="devices">
+        <div class="device-listing">
+            <form id="trace-form">
+                {% csrf_token %}
+                <div id="devices">
 
-                    </div>
-                    <button class="mdl-button mdl-button-js mdl-color--green-400 mdl-button--raised trace-button">
-                        <i class="material-icons">device_hub</i>
-                        Trace
-                    </button>
-                </form>
-            </div>
+                </div>
+                <button class="mdl-button mdl-button-js mdl-color--green-400 mdl-button--raised trace-button">
+                    <i class="material-icons">device_hub</i>
+                    Trace
+                </button>
+                <input type="hidden" name="session" value="{{ session_key }}">
+            </form>
+        </div>
 
     </div>
-    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--12-col-tablet mdl-cell--12-col-desktop
+    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--12-col-tablet mdl-cell--6-col-desktop
             mdl-shadow--2dp card fade" id="trace-card">
         <div id="loading-trace" class="mdl-progress mdl-js-progress mdl-progress__indeterminate fade">
-            <h4 id="loading-text">Performing trace <span style="font-size: 12px;">(this may take a few moments)</span></h4>
+            <h4 id="loading-text">Performing trace <span style="font-size: 12px;">(this may take a few moments)</span>
+            </h4>
         </div>
         <div id="trace-results" class="fade">
         </div>
     </div>
-    <!-- Brandon Map stuff-->
-    <div id="map"></div>
-    <script>
-      function initMap() {
-        var mapDiv = document.getElementById('map');
-        var map = new google.maps.Map(mapDiv, {
-          center: {lat: 44.540, lng: -78.546},
-          zoom: 8
-        });
-      }
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?callback=initMap"
-        async defer></script>
-    <!-- End Brandon Map Stuff-->
+
+    <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--12-col-tablet mdl-cell--6-col-desktop
+            mdl-shadow--2dp card fade" id="map-card">
+        <div id="map-results">
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -59,78 +54,125 @@
     <script>
         var device_listing_div = $('#devices');
         var device_url = "{% url 'device_listing' %}";
-        var session_key = "{{ session_key }}";
+        var delete_url = "{% url 'device_delete' %}";
         var material_js_url = "{% static 'js/material.min.js' %}";
         var trace_card = $("#trace-card");
         var resultsDiv = $("#trace-results");
         var trace_loader = $("#loading-trace");
-
-        fetch_devices(device_url, session_key)
-        $('.refresh').on('click', function(){
-            $('#devices').find('li').addClass('loading');
-            var loading_text = $('<span>Loading...</span>');
-            loading_text.css({
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                'text-align': 'center',
-                top: '50%',
-                opacity: 1
-            }).appendTo(device_listing_div);
-            fetch_devices(device_url, session_key)
-                .done(function(data){
-                    // Reapply the MDL stylings that were lost after the ajax call.
-                    componentHandler.upgradeDom();
-                })
-                .error(function(data){
-                    $('#devices').find('li').removeClass('loading');
-                    loading_text.remove();
-                });
-        });
-        setInterval(function(){
-            fetch_devices(device_url, session_key)
-                .done(function(data){
-                    // Reapply the MDL stylings that were lost after the ajax call.
-                    componentHandler.upgradeDom();
-                })
-                .error(function(data){
-                    $('#devices').find('li').removeClass('loading');
-                    loading_text.remove();
-                });
-        }, 5000);
-
-
         var traceForm = $('form');
         var traceUrl = '{% url "trace" %}';
-        traceForm.submit(function(event){
+        var map_card = $("#map-card");
+        var map;
+        var directionsDisplay;
+        var directionsService;
+
+        submit_form(device_url, traceForm.serializeArray())
+            .done(function (data) {
+                updateDeviceListing(data);
+            });
+
+        device_listing_div.on('click', '.refresh', function (event) {
+            submit_form(device_url, $('form').serializeArray())
+                    .done(function (data) {
+                        updateDeviceListing(data);
+                    });
+        });
+
+        device_listing_div.on('click', '.delete', function (event) {
+            submit_form(delete_url, $('form').serializeArray());
+        });
+
+        setInterval(function () {
+            if (!$('#deviceName').is(':focus')) {
+                submit_form(device_url, $('form').serializeArray())
+                    .done(function (data) {
+                        updateDeviceListing(data);
+                    });
+            }
+        }, 5000);
+
+        $('.trace-button').click(function (event) {
 
             var formData = traceForm.serializeArray();
-            var formDict = {};
-            $.each(formData, function(index, data){
-                console.log(data);
-                if (data.name in formDict){
-                    if (formDict[data.name].constructor == Array){
-                        formDict[data.name].append(data.value);
-                    } else {
-                        var oldResults = formDict[data.name];
-                        formDict[data.name] = [oldResults, data.value];
-                    }
-                }else{
-                    formDict[data.name] = data.value;
-                }
-            });
-            console.log(formDict);
 
             resultsDiv.removeClass('fade-in');
             trace_card.addClass('fade-in');
             trace_loader.addClass('fade-in');
 
-            perform_trace(traceUrl, formData).done(function(data, textStatus, jqXHR){
+            submit_form(traceUrl, formData).done(function (data, textStatus, jqXHR) {
                 resultsDiv.html(data);
+                var source_ip = $('input[name="myDeviceIp"]').val();
+                var routes = tracedata.list;
+                $.each(routes, function (route_index, route) {
+                    var waypoints = [];
+                    var request = {
+                        waypoints: waypoints,
+                        provideRouteAlternatives: false,
+                        optimizeWaypoints: false,
+                        avoidHighways: false,
+                        avoidTolls: false
+                    };
+                    $.each(routes.results, function (hop_index, hop) {
+                        if (hop.response) {
+                            var lat = hop.latitude;
+                            var long = hop.longitude;
+                            var location = new google.maps.LatLng(lat, long);
+                            if (!request.origin) {
+                                request.origin = location;
+                            } else if (hop_index == (routes.results - 1)) {
+                                request.destination = location;
+                            }
+                            else {
+                                waypoints.append({
+                                    location: location,
+                                    stopover: true
+                                });
+                            }
+                        }
+                    });
+
+                    directionsService.route(request, function (result, status) {
+                        console.log("Map results:", result, "Status", status);
+                        if (status == google.maps.DirectionsStatus.OK) {
+                            directionsDisplay.setDirections(result);
+                        }
+                    });
+
+                });
                 trace_loader.removeClass('fade-in');
                 resultsDiv.addClass('fade-in');
+                map_card.addClass('fade-in');
             });
             event.preventDefault();
         });
+
+        function initMap() {
+            var opt = {
+                minZoom: 3,
+                maxZoom: 14,
+                center: new google.maps.LatLng(54.5260, -105.2551),
+                zoom: 4
+            };
+            var mapDiv = document.getElementById('map-results');
+            map = new google.maps.Map(mapDiv, opt);
+            directionsService = new google.maps.DirectionsService();
+            directionsDisplay = new google.maps.DirectionsRenderer();
+            directionsDisplay.setMap(map);
+        }
+
+        function updateDeviceListing(data) {
+            data = $(data);
+            var form_fields = traceForm.serializeArray();
+            $.each(form_fields, function (index, field) {
+                if (field.name == "devices") {
+                    data.find('input[name="devices"][value="' + field.value + '"]').attr('checked', true);
+                }
+            });
+            $("#devices").html(data);
+            // Reapply the MDL stylings that were lost after the ajax call.
+            componentHandler.upgradeDom();
+        }
+
     </script>
+    <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script>
 {% endblock scripts %}

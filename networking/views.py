@@ -1,10 +1,10 @@
-import urllib, os, re
+import urllib, os
 from urllib2 import Request, urlopen, URLError
 from operator import itemgetter
 import json
 from django.conf import settings
+from django.db import IntegrityError
 from django.http import HttpResponse
-from django.http.response import JsonResponse
 from django.shortcuts import render
 from .models import Session, Device
 
@@ -42,24 +42,46 @@ def device_listing(request):
         Ajax view for listing all devices attached to the specified session. Session key must be passed as a
         get parameter.
     """
-    devices = []
-    my = None
+    connect_session_key = request.POST.get('session', None)
+    device_name = request.POST.get('deviceName', None)
+    my_device_ip = request.POST.get('myDeviceIp', request.ip)
 
-    connect_session_key = request.GET.get('session', None)
+    device_kwargs = {
+        'ip': my_device_ip,
+        'defaults': {
+            'name': device_name,
+        },
+    }
+    connect_session = None
     if connect_session_key is not None:
         try:
             connect_session = Session.objects.get(key=connect_session_key)
         except Session.DoesNotExist:
             pass
         else:
-            devices = Device.objects.filter(session=connect_session).exclude(ip=request.ip)
-            try:
-                my = Device.objects.get(session=connect_session, ip=request.ip)
-            except Device.DoesNotExist:
-                pass
+            device_kwargs['session'] = connect_session
+
+    current_device, created = Device.objects.get_or_create(**device_kwargs)
+
+    if not created and not current_device.ip == request.ip:
+        current_device.ip = request.ip
+
+    if device_name is not None and not current_device.name == device_name:
+        current_device.name = device_name
+
+    try:
+        current_device.save()
+    except IntegrityError:
+        current_device = Device.objects.get(ip=request.ip)
+
+        if connect_session:
+            current_device.session = connect_session
+            current_device.save()
+
+    devices = Device.objects.filter(session=current_device.session).exclude(ip=my_device_ip)
 
     return render(request, 'networking/device_listing.html', context={
-        'devices': devices, 'my': my
+        'devices': devices, 'current_device': current_device
     })
 
 
@@ -85,9 +107,14 @@ def trace(request):
     source_hops = source_trace.get('results')
     num_source_hops = len(source_hops)
 
+    for hop_counter in range(0, num_source_hops):
+        # Loop through and flip all of the hop numbers so that we effectively reverse
+        # the perspective of the traceroute
+        source_hops[hop_counter]['hop'] = num_source_hops - hop_counter
+
     for device in target_devices:
-        trace = trace_device(device=device)
-        node_list = trace.get('results')
+        device_trace = trace_device(device=device)
+        node_list = device_trace.get('results')
         for node in node_list:
             # Increment all of the hop numbers in the destination trace
             # since we are about to add the source trace to the beginning
@@ -95,13 +122,14 @@ def trace(request):
 
         # Add the source trace to the beginning of the destination trace
         node_list.extend(source_hops)
+
         # Sort the list by the hop number
-        trace['results'] = sorted(node_list, key=itemgetter('hop'))
+        device_trace['results'] = sorted(node_list, key=itemgetter('hop'))
         # Add this trace result to the list of traces being performed.
-        traces_list.append(trace)
+        traces_list.append(device_trace)
 
     return render(request, 'networking/trace_results.html', context={
-        'traces': traces
+        'tracesjson':   json.dumps(traces), 'traces': traces
     })
 
 
@@ -136,17 +164,22 @@ def trace_device(device):
 
         #Get additional information on individual hop through GeoIP API
         try:
-
-            traceurl = 'http://geoip.nekudo.com/api/8.8.8.8/en/short'
+            traceurl = 'http://geoip.nekudo.com/api/%s/en/short' % ip
             tracerequest = Request(traceurl)
             inforesponse = urlopen(tracerequest)
             stringinfo = json.loads(inforesponse.read())
-
-            latitude = stringinfo['location']['latitude']
-            longitude = stringinfo['location']['longitude']
-            city = stringinfo['city']
-            country = stringinfo['country']['name']
-            timezone = stringinfo['location']['time_zone']
+            print "Response: %s" % stringinfo
+            message_type = stringinfo.get('type')
+            message = stringinfo.get('msg')
+            if message_type == 'error':
+                print "Error getting location information[%s]: %s" % (ip, message)
+                latitude = longitude = city = country = timezone = ""
+            else:
+                latitude = stringinfo['location']['latitude']
+                longitude = stringinfo['location']['longitude']
+                city = stringinfo['city']
+                country = stringinfo['country']['name']
+                timezone = stringinfo['location']['time_zone']
 
         except URLError, e:
             print 'No kittez. Got an error code:', e
@@ -168,9 +201,7 @@ def trace_device(device):
     hop_counter = 1
     for hop in hop_list:
         hop_difference = hop['hop'] - hop_counter
-        print "diff: %s" % hop_difference
         for index_ctr in range(0, hop_difference):
-            print "hit loop: %s" % index_ctr
             new_hop_list.append({
                 'response': False,
                 'hop': hop_counter,
@@ -182,3 +213,17 @@ def trace_device(device):
         hop_counter += 1
 
     return trace
+
+
+def delete_devices(request):
+    device_ids = request.POST.getlist('devices', [])
+    connect_session_key = request.POST.get('session', None)
+
+    if connect_session_key is not None:
+        devices_to_delete = Device.objects.filter(pk__in=device_ids, session__key=connect_session_key)
+    else:
+        devices_to_delete = Device.objects.filter(pk__in=device_ids)
+
+    devices_to_delete.delete()
+
+    return HttpResponse("Success")
