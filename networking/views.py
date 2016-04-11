@@ -157,10 +157,17 @@ def trace_device(device):
 
     # Loop through each line in the string results, each line represents one hop
     for line in lines:
+        hop_response = {}
         line_type, hop_number, ip = line.split(' ')
 
         hop_number = int(hop_number)
         hop_number += 1
+
+        hop_response.update({
+            'response': True,
+            'hop': hop_number,
+            'ip': ip,
+        })
 
         #Get additional information on individual hop through GeoIP API
         try:
@@ -173,27 +180,30 @@ def trace_device(device):
             message = stringinfo.get('msg')
             if message_type == 'error':
                 print "Error getting location information[%s]: %s" % (ip, message)
-                latitude = longitude = city = country = timezone = ""
+                latitude = longitude = city = country_name = timezone = ""
             else:
-                latitude = stringinfo['location']['latitude']
-                longitude = stringinfo['location']['longitude']
-                city = stringinfo['city']
-                country = stringinfo['country']['name']
-                timezone = stringinfo['location']['time_zone']
+                location_info = stringinfo.get('location', {})
+
+                latitude = location_info.get('latitude', '')
+                longitude = location_info.get('longitude', '')
+                timezone = location_info.get('time_zone', '')
+
+                city = stringinfo.get('city', '')
+                country = stringinfo.get('country', {})
+                country_name = country.get('name', '')
+
+            hop_response.update({
+                'city': city,
+                'country': country_name,
+                'timezone': timezone,
+                'latitude': latitude,
+                'longitude': longitude
+            })
 
         except URLError, e:
             print 'No kittez. Got an error code:', e
 
-        hop_list.append({
-            'response': True,
-            'hop': hop_number,
-            'ip': ip,
-            'city': city,
-            'country': country,
-            'timezone': timezone,
-            'latitude': latitude,
-            'longitude': longitude
-        })
+        hop_list.append(hop_response)
 
     hop_list = sorted(hop_list, key=itemgetter('hop'))
 
