@@ -103,41 +103,41 @@
                 resultsDiv.html(data);
                 var source_ip = $('input[name="myDeviceIp"]').val();
                 var routes = tracedata.list;
+
                 $.each(routes, function (route_index, route) {
-                    var waypoints = [];
+                    var locations = [];
+                    var lastValidLocation;
                     var request = {
-                        waypoints: waypoints,
-                        provideRouteAlternatives: false,
-                        optimizeWaypoints: false,
-                        avoidHighways: false,
-                        avoidTolls: false
+                        path: locations,
+                        geodesic: true,
+                        strokeColor: "#FF0000",
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2
                     };
-                    $.each(routes.results, function (hop_index, hop) {
+                    $.each(route.results, function (hop_index, hop) {
+                        console.log("Route loop", hop);
                         if (hop.response) {
                             var lat = hop.latitude;
                             var long = hop.longitude;
-                            var location = new google.maps.LatLng(lat, long);
-                            if (!request.origin) {
-                                request.origin = location;
-                            } else if (hop_index == (routes.results - 1)) {
-                                request.destination = location;
-                            }
-                            else {
-                                waypoints.append({
-                                    location: location,
-                                    stopover: true
-                                });
-                            }
+                            var location = {
+                                lat: lat,
+                                lng: long
+                            };
+                            locations.push({
+                                lat: lat,
+                                lng: long
+                            });
+                            lastValidLocation = location;
+
                         }
                     });
 
-                    directionsService.route(request, function (result, status) {
-                        console.log("Map results:", result, "Status", status);
-                        if (status == google.maps.DirectionsStatus.OK) {
-                            directionsDisplay.setDirections(result);
-                        }
-                    });
-
+                    if (lastValidLocation){
+                        request.destination = lastValidLocation;
+                    }
+                    console.log("Created route", request);
+                    var serverPath = new google.maps.Polyline(request);
+                    serverPath.setMap(map);
                 });
                 trace_loader.removeClass('fade-in');
                 resultsDiv.addClass('fade-in');
@@ -147,6 +147,8 @@
         });
 
         function initMap() {
+            directionsService = new google.maps.DirectionsService;
+            directionsDisplay = new google.maps.DirectionsRenderer;
             var opt = {
                 minZoom: 3,
                 maxZoom: 14,
@@ -155,8 +157,6 @@
             };
             var mapDiv = document.getElementById('map-results');
             map = new google.maps.Map(mapDiv, opt);
-            directionsService = new google.maps.DirectionsService();
-            directionsDisplay = new google.maps.DirectionsRenderer();
             directionsDisplay.setMap(map);
         }
 
