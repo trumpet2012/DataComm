@@ -105,6 +105,7 @@
                 var routes = tracedata.list;
                 $.each(routes, function (route_index, route) {
                     var waypoints = [];
+                    var lastValidLocation;
                     var request = {
                         waypoints: waypoints,
                         provideRouteAlternatives: false,
@@ -117,10 +118,8 @@
                             var lat = hop.latitude;
                             var long = hop.longitude;
                             var location = new google.maps.LatLng(lat, long);
-                            if (!request.origin) {
+                            if (typeof request.origin == 'undefined') {
                                 request.origin = location;
-                            } else if (hop_index == (routes.results - 1)) {
-                                request.destination = location;
                             }
                             else {
                                 waypoints.append({
@@ -128,16 +127,20 @@
                                     stopover: true
                                 });
                             }
+                            lastValidLocation = location;
                         }
                     });
 
-                    directionsService.route(request, function (result, status) {
-                        console.log("Map results:", result, "Status", status);
-                        if (status == google.maps.DirectionsStatus.OK) {
-                            directionsDisplay.setDirections(result);
-                        }
-                    });
+                    if (lastValidLocation){
+                        request.destination = lastValidLocation;
 
+                        directionsService.route(request, function (result, status) {
+                            console.log("Map results:", result, "Status", status);
+                            if (status == google.maps.DirectionsStatus.OK) {
+                                directionsDisplay.setDirections(result);
+                            }
+                        });
+                    }
                 });
                 trace_loader.removeClass('fade-in');
                 resultsDiv.addClass('fade-in');

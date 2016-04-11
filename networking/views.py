@@ -59,7 +59,7 @@ def device_listing(request):
         except Session.DoesNotExist:
             pass
         else:
-            device_kwargs['session'] = connect_session
+            device_kwargs['defaults']['session'] = connect_session
 
     current_device, created = Device.objects.get_or_create(**device_kwargs)
 
