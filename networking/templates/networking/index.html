@@ -114,7 +114,8 @@
                         avoidHighways: false,
                         avoidTolls: false
                     };
-                    $.each(routes.results, function (hop_index, hop) {
+                    $.each(route.results, function (hop_index, hop) {
+                        console.log("Route loop", hop);
                         if (hop.response) {
                             var lat = hop.latitude;
                             var long = hop.longitude;
