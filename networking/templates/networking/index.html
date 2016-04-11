@@ -112,7 +112,8 @@
                         provideRouteAlternatives: false,
                         optimizeWaypoints: false,
                         avoidHighways: false,
-                        avoidTolls: false
+                        avoidTolls: false,
+                        travelMode: google.maps.TravelMode.DRIVING
                     };
                     $.each(route.results, function (hop_index, hop) {
                         console.log("Route loop", hop);
