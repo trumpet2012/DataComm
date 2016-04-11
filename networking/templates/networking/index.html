@@ -103,6 +103,7 @@
                 resultsDiv.html(data);
                 var source_ip = $('input[name="myDeviceIp"]').val();
                 var routes = tracedata.list;
+
                 $.each(routes, function (route_index, route) {
                     var waypoints = [];
                     var lastValidLocation;
@@ -133,14 +134,14 @@
 
                     if (lastValidLocation){
                         request.destination = lastValidLocation;
-
-                        directionsService.route(request, function (result, status) {
-                            console.log("Map results:", result, "Status", status);
-                            if (status == google.maps.DirectionsStatus.OK) {
-                                directionsDisplay.setDirections(result);
-                            }
-                        });
                     }
+                    console.log("Created route", request);
+                    directionsService.route(request, function (result, status) {
+                        console.log("Map results:", result, "Status", status);
+                        if (status == google.maps.DirectionsStatus.OK) {
+                            directionsDisplay.setDirections(result);
+                        }
+                    });
                 });
                 trace_loader.removeClass('fade-in');
                 resultsDiv.addClass('fade-in');
@@ -150,6 +151,8 @@
         });
 
         function initMap() {
+            directionsService = new google.maps.DirectionsService;
+            directionsDisplay = new google.maps.DirectionsRenderer;
             var opt = {
                 minZoom: 3,
                 maxZoom: 14,
@@ -158,8 +161,6 @@
             };
             var mapDiv = document.getElementById('map-results');
             map = new google.maps.Map(mapDiv, opt);
-            directionsService = new google.maps.DirectionsService();
-            directionsDisplay = new google.maps.DirectionsRenderer();
             directionsDisplay.setMap(map);
         }
 
