@@ -116,7 +116,7 @@
                     };
                     $.each(route.results, function (hop_index, hop) {
                         console.log("Route loop", hop);
-                        if (hop.response) {
+                        if (hop.response && hop.latitude) {
                             var lat = hop.latitude;
                             var long = hop.longitude;
                             var location = {
