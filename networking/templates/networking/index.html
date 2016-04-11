@@ -105,32 +105,30 @@
                 var routes = tracedata.list;
 
                 $.each(routes, function (route_index, route) {
-                    var waypoints = [];
+                    var locations = [];
                     var lastValidLocation;
                     var request = {
-                        waypoints: waypoints,
-                        provideRouteAlternatives: false,
-                        optimizeWaypoints: false,
-                        avoidHighways: false,
-                        avoidTolls: false,
-                        travelMode: google.maps.TravelMode.DRIVING
+                        path: locations,
+                        geodesic: true,
+                        strokeColor: "#FF0000",
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2
                     };
                     $.each(route.results, function (hop_index, hop) {
                         console.log("Route loop", hop);
                         if (hop.response) {
                             var lat = hop.latitude;
                             var long = hop.longitude;
-                            var location = new google.maps.LatLng(lat, long);
-                            if (typeof request.origin == 'undefined') {
-                                request.origin = location;
-                            }
-                            else {
-                                waypoints.push({
-                                    location: location,
-                                    stopover: true
-                                });
-                            }
+                            var location = {
+                                lat: lat,
+                                lng: long
+                            };
+                            locations.push({
+                                lat: lat,
+                                lng: long
+                            });
                             lastValidLocation = location;
+
                         }
                     });
 
@@ -138,12 +136,8 @@
                         request.destination = lastValidLocation;
                     }
                     console.log("Created route", request);
-                    directionsService.route(request, function (result, status) {
-                        console.log("Map results:", result, "Status", status);
-                        if (status == google.maps.DirectionsStatus.OK) {
-                            directionsDisplay.setDirections(result);
-                        }
-                    });
+                    var serverPath = new google.maps.Polyline(request);
+                    serverPath.setMap(map);
                 });
                 trace_loader.removeClass('fade-in');
                 resultsDiv.addClass('fade-in');
