@@ -62,6 +62,11 @@
     padding: 16px 16px;
 }
 
+#history-card{
+    width: 200px;
+    height: 300px;
+}
+
 
 .fade {
     opacity: 0;

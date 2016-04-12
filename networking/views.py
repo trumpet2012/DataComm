@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import render
-from .models import Session, Device
+from .models import Session, Device, TraceHistory
 
 
 def index(request):
@@ -128,6 +128,10 @@ def trace(request):
         # Add this trace result to the list of traces being performed.
         traces_list.append(device_trace)
 
+        #create TraceHistory object
+        TraceHistory.objects.create(source=source_device, destination=device, session=source_device.session, hops=json.dumps(device_trace['results']))
+
+
     return render(request, 'networking/trace_results.html', context={
         'tracesjson':   json.dumps(traces), 'traces': traces
     })
@@ -223,6 +227,15 @@ def trace_device(device):
         hop_counter += 1
 
     return trace
+
+#change this to fetch from TraceHistory table
+def trace_history(request):
+    #request.post filter by a session
+    history = TraceHistory.objects.filter(session__key=request.POST.get("session"))
+    return render(request, 'networking/trace_history.html', context={
+        'tracehistory':history
+    })
+
 
 
 def delete_devices(request):

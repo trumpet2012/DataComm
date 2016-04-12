@@ -17,12 +17,13 @@ from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib import admin
-from networking.views import index, device_listing, trace, delete_devices
+from networking.views import index, device_listing, trace, trace_history, delete_devices
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^devices/', device_listing, name='device_listing'),
     url(r'^delete/', delete_devices, name='device_delete'),
     url(r'^trace/', trace, name='trace'),
+    url(r'^history/', trace_history, name='trace_history'),
     url(r'', index, name='index')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
