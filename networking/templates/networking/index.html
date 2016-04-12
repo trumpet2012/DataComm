@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load qr_tags staticfiles %}
-
+{% include "networking/trace_history.html" %}
 {% block content %}
 
     <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--3-col-tablet mdl-cell--4-col-desktop mdl-shadow--2dp card">
@@ -27,10 +27,21 @@
                     Trace
                 </button>
                 <input type="hidden" name="session" value="{{ session_key }}">
+
             </form>
         </div>
 
     </div>
+
+
+    <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+  <div class="mdl-tabs__tab-bar">
+      <a href="#trace-info-panel" class="mdl-tabs__tab is-active">Trace Info</a>
+      <a href="#map-panel" class="mdl-tabs__tab">Map</a>
+      <a href="#history-panel" class="mdl-tabs__tab" id="history-btn">History</a>
+  </div>
+
+  <div class="mdl-tabs__panel is-active" id="trace-info-panel">
     <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--12-col-tablet mdl-cell--6-col-desktop
             mdl-shadow--2dp card fade" id="trace-card">
         <div id="loading-trace" class="mdl-progress mdl-js-progress mdl-progress__indeterminate fade">
@@ -40,12 +51,24 @@
         <div id="trace-results" class="fade">
         </div>
     </div>
-
+  </div>
+  <div class="mdl-tabs__panel" id="map-panel">
     <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--12-col-tablet mdl-cell--6-col-desktop
             mdl-shadow--2dp card fade" id="map-card">
         <div id="map-results">
         </div>
     </div>
+  </div>
+  <div class="mdl-tabs__panel" id="history-panel">
+    <div id = "trace-history">
+        <div id = "target-area">
+
+        </div>
+    </div>
+  </div>
+</div>
+
+
 
 {% endblock %}
 
@@ -53,7 +76,9 @@
     <script src="{% static 'js/devices.js' %}"></script>
     <script>
         var device_listing_div = $('#devices');
+        var trace_history_div = $('#trace-history');
         var device_url = "{% url 'device_listing' %}";
+        var history_url = "{% url 'trace_history' %}";
         var delete_url = "{% url 'device_delete' %}";
         var material_js_url = "{% static 'js/material.min.js' %}";
         var trace_card = $("#trace-card");
@@ -66,10 +91,13 @@
         var directionsDisplay;
         var directionsService;
 
+
         submit_form(device_url, traceForm.serializeArray())
             .done(function (data) {
                 updateDeviceListing(data);
             });
+
+
 
         device_listing_div.on('click', '.refresh', function (event) {
             submit_form(device_url, $('form').serializeArray())
@@ -90,6 +118,15 @@
                     });
             }
         }, 5000);
+
+        $('#history-btn').click(function (event){
+            //history_card.addClass('fade-in');
+            submit_form(history_url, $('form').serializeArray())
+                    .done(function (data) {
+                        showTraceHistory(data);
+                    });
+
+        });
 
         $('.trace-button').click(function (event) {
 
@@ -170,6 +207,11 @@
             });
             $("#devices").html(data);
             // Reapply the MDL stylings that were lost after the ajax call.
+            componentHandler.upgradeDom();
+        }
+
+        function showTraceHistory(data){
+            $("#target-area").html(data);
             componentHandler.upgradeDom();
         }
 

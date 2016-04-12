@@ -1,6 +1,8 @@
 import uuid
+import json
 
 from django.db import models
+from jsonfield import JSONField
 
 
 class Session(models.Model):
@@ -13,15 +15,10 @@ class Device(models.Model):
     ip = models.GenericIPAddressField(blank=False, null=False, unique=True)
 
 
-
-class Test(models.Model):
-    name = models.CharField(max_length=128, unique=True)
-    def __unicode__(self):
-        return self.name
-
-
 #class fields for Trace History will have foreign key: Source and Destination
 
 class TraceHistory(models.Model):
-    SourceIP = models.ForeignKey(Session)
-    DestinationIP = models.ForeignKey(Device)
+    source = models.ForeignKey(Device, related_name="+")
+    destination = models.ForeignKey(Device, related_name="+")
+    session = models.ForeignKey(Session, related_name="history")
+    hops = JSONField()

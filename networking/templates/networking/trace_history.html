@@ -1,0 +1,29 @@
+{% load staticfiles %}
+{%  for trace in tracehistory %}
+    <h4>From source IP: {{ trace.source.ip }} to destination IP: {{ trace.destination.ip }}</h4>
+    <table class="mdl-data-table mdl-js-data-table trace-table">
+      <thead>
+        <tr>
+          <th class="mdl-data-table__cell--non-numeric">Hop</th>
+          <th class="mdl-data-table__cell--non-numeric">IP</th>
+            <th class="mdl-data-table__cell--non-numeric">Hop Details</th>
+        </tr>
+      </thead>
+      <tbody >
+        {% for perhop in trace.hops.results %}
+            <tr>
+                <td class="mdl-data-table__cell--non-numeric">
+                    {{ perhop.hop }}
+                </td>
+                <td class="mdl-data-table__cell--non-numeric">
+                    {{ perhop.ip }}
+                </td>
+                <td class="mdl-data-table__cell--non-numeric">
+                    {{ perhop }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}
+
