@@ -22,3 +22,6 @@ class TraceHistory(models.Model):
     destination = models.ForeignKey(Device, related_name="+")
     session = models.ForeignKey(Session, related_name="history")
     hops = JSONField()
+
+    def hopsJson(self):
+        return json.loads(self.hops)
