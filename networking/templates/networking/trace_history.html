@@ -9,7 +9,8 @@
             <th class="mdl-data-table__cell--non-numeric">Hop Details</th>
         </tr>
       </thead>
-      <tbody >
+      <tbody>
+      {{ trace }}
         {% for perhop in trace.hops.results %}
             {{ perhop }}
             <tr>
