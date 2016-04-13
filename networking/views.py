@@ -194,7 +194,9 @@ def trace_device(device):
 
                 city = stringinfo.get('city', '')
                 country = stringinfo.get('country', {})
-                country_name = country.get('name', '')
+                country_name = ""
+                if country:
+                    country_name = country.get('name', '')
 
             hop_response.update({
                 'city': city,
