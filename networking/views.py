@@ -186,11 +186,10 @@ def trace_device(device):
                 print "Error getting location information[%s]: %s" % (ip, message)
                 latitude = longitude = city = country = timezone = region = zip = ""
             else:
-                location_info = stringinfo.get('location', {})
 
-                latitude = location_info.get('latitude', '')
-                longitude = location_info.get('longitude', '')
-                timezone = location_info.get('timeZone', '')
+                latitude = stringinfo.get('latitude', '')
+                longitude = stringinfo.get('longitude', '')
+                timezone = stringinfo.get('timeZone', '')
 
                 zip = stringinfo.get('zipCode', '')
                 city = stringinfo.get('cityName', '')
