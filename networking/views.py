@@ -172,35 +172,36 @@ def trace_device(device):
             'hop': hop_number,
             'ip': ip,
         })
-
+        api_key = 'ab27fe914126e5049df74f35caac7ff84888921adc682dd704112261facf4f62'
         #Get additional information on individual hop through GeoIP API
         try:
-            traceurl = 'http://geoip.nekudo.com/api/%s/en/short' % ip
+            traceurl = 'http://api.ipinfodb.com/v3/ip-city/?key=%s&ip=%s&format=json' % (api_key, ip)
             tracerequest = Request(traceurl)
             inforesponse = urlopen(tracerequest)
             stringinfo = json.loads(inforesponse.read())
             print "Response: %s" % stringinfo
-            message_type = stringinfo.get('type')
-            message = stringinfo.get('msg')
-            if message_type == 'error':
+            message_status = stringinfo.get('statusCode')
+            message = stringinfo.get('statusMessage')
+            if message_status == 'fail':
                 print "Error getting location information[%s]: %s" % (ip, message)
-                latitude = longitude = city = country_name = timezone = ""
+                latitude = longitude = city = country = timezone = region = zip = ""
             else:
                 location_info = stringinfo.get('location', {})
 
                 latitude = location_info.get('latitude', '')
                 longitude = location_info.get('longitude', '')
-                timezone = location_info.get('time_zone', '')
+                timezone = location_info.get('timeZone', '')
 
-                city = stringinfo.get('city', '')
-                country = stringinfo.get('country', {})
-                country_name = ""
-                if country:
-                    country_name = country.get('name', '')
+                zip = stringinfo.get('zipCode', '')
+                city = stringinfo.get('cityName', '')
+                region = stringinfo.get('regionName', '')
+                country = stringinfo.get('countryName', '')
 
             hop_response.update({
+                'zip': zip,
                 'city': city,
-                'country': country_name,
+                'region': region,
+                'country': country,
                 'timezone': timezone,
                 'latitude': latitude,
                 'longitude': longitude
