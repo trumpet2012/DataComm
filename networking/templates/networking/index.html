@@ -234,6 +234,7 @@
             var mapDiv = document.getElementById('map-results');
             map = new google.maps.Map(mapDiv, opt);
             directionsDisplay.setMap(map);
+            $.getScript("{% static 'js/markerwithlabel.js' %}");
         }
 
         function updateDeviceListing(data) {
@@ -256,5 +257,4 @@
 
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script>
-    <script src="{% static 'js/markerwithlabel.js' %}"></script>
 {% endblock scripts %}
