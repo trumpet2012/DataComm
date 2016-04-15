@@ -1,4 +1,6 @@
 {% load staticfiles %}
+<link href="{% static 'css/styles.css' %}" type="text/css" rel="stylesheet"/>
+<link href="{% static 'css/dropdown.css' %}" type="text/css" rel="stylesheet"/>
 {%  for trace in tracehistory %}
     <h4>From source IP: {{ trace.source.ip }} to destination IP: {{ trace.destination.ip }}</h4>
     <table class="mdl-data-table mdl-js-data-table trace-table">
@@ -12,14 +14,27 @@
       <tbody>
         {% for perhop in trace.hopsJson %}
             <tr>
-                <td class="mdl-data-table__cell--non-numeric">
+            <td class="mdl-data-table__cell--non-numeric">
                     {{ perhop.hop }}
                 </td>
                 <td class="mdl-data-table__cell--non-numeric">
                     {{ perhop.ip }}
                 </td>
-                <td class="mdl-data-table__cell--non-numeric">
-                    {{ perhop }}
+                <td class="mdl-data-table__cell--non-numeric tracerinfo">
+                    <ul>
+                            <li class="container" >
+                                <input type="checkbox" id="{{ perhop.hop }}" class="btnShow">
+                                <label for={{ perhop.hop }}></label>
+                                <ul>
+                                    <li class="mdl-list__item">City: {{ perhop.city }}</li>
+                                    <li class="mdl-list__item">Region: {{ perhop.region }}</li>
+                                    <li class="mdl-list__item">Zip: {{ perhop.zip }}</li>
+                                    <li class="mdl-list__item">Country: {{ perhop.country }}</li>
+                                    <li class="mdl-list__item">Latitude: {{ perhop.latitude }}</li>
+                                    <li class="mdl-list__item">Longitude: {{ perhop.longitude }}</li>
+                                </ul>
+                            </li>
+                        </ul>
                 </td>
             </tr>
         {% endfor %}

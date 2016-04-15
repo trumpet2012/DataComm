@@ -125,6 +125,10 @@
             submit_form(delete_url, $('form').serializeArray());
         });
 
+         $('body').on('click', '.btnShow', function (event) {
+            componentHandler.upgradeDom();
+        });
+
         setInterval(function () {
             if (!$('#deviceName').is(':focus')) {
                 submit_form(device_url, $('form').serializeArray())
