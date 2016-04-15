@@ -141,9 +141,9 @@
                 var route_colors = ["#FF0000", "#00FF00", "#0000FF", "#AC10FF"];
                 var source_ip = $('input[name="myDeviceIp"]').val();
                 var routes = tracedata.list;
-                var markers = [];
                 var previous_city = undefined;
                 $.each(routes, function (route_index, route) {
+                    var marker_count = 1;
                     var locations = [];
                     var lastValidLocation;
                     var request = {
@@ -164,13 +164,15 @@
                             };
                             locations.push(location);
                             if (previous_city !== current_city){
-                                markers.push(location);
-                                previous_city = current_city;
+                                console.log("Adding marker", location);
                                 new google.maps.Marker({
                                     position: location,
-                                    label: '' + markers.length,
+                                    label: '' + marker_count,
                                     map: map
-                                })
+                                });
+                                previous_city = current_city;
+                                marker_count++;
+
                             }
                             lastValidLocation = location;
                         }
