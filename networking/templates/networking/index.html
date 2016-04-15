@@ -142,6 +142,7 @@
                 var routes = tracedata.list;
 
                 $.each(routes, function (route_index, route) {
+                    var markers = [];
                     var locations = [];
                     var lastValidLocation;
                     var request = {
@@ -151,8 +152,9 @@
                         strokeOpacity: 1.0,
                         strokeWeight: 2
                     };
+                    var previous_city = undefined;
                     $.each(route.results, function (hop_index, hop) {
-                        console.log("Route loop", hop);
+                        var current_city = hop.city;
                         if (hop.response && hop.latitude) {
                             var lat = hop.latitude;
                             var long = hop.longitude;
@@ -160,19 +162,23 @@
                                 lat: lat,
                                 lng: long
                             };
-                            locations.push({
-                                lat: lat,
-                                lng: long
-                            });
+                            locations.push(location);
+                            if (previous_city !== current_city){
+                                markers.push(location);
+                                previous_city = current_city;
+                                new google.maps.Marker({
+                                    position: location,
+                                    label: markers.length,
+                                    map: map
+                                })
+                            }
                             lastValidLocation = location;
-
                         }
                     });
 
                     if (lastValidLocation){
                         request.destination = lastValidLocation;
                     }
-                    console.log("Created route", request);
                     var serverPath = new google.maps.Polyline(request);
                     serverPath.setMap(map);
                 });
