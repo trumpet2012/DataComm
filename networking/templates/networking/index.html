@@ -1,6 +1,21 @@
 {% extends 'base.html' %}
 {% load qr_tags staticfiles %}
 {% include "networking/trace_history.html" %}
+
+{% block styles %}
+    <style>
+        .labels {
+            color: white;
+            background-color: red;
+            font-family: "Lucida Grande", "Arial", sans-serif;
+            font-size: 10px;
+            text-align: center;
+            width: 30px;
+            white-space: nowrap;
+        }
+    </style>
+{% endblock styles %}
+
 {% block content %}
 
     <div class="mdl-card mdl-cell mdl-cell--12-col-phone mdl-cell--3-col-tablet mdl-cell--4-col-desktop mdl-shadow--2dp card">
@@ -165,9 +180,12 @@
                             locations.push(location);
                             if (previous_city !== current_city){
                                 console.log("Adding marker", marker_count, location);
-                                new google.maps.Marker({
+                                new MarkerWithLabel({
                                     position: location,
-                                    label: '' + marker_count,
+                                    labelContent: '' + marker_count,
+                                    labelClass: "labels",
+                                    labelInBackground: false,
+                                    icon: pinSymbol('red'),
                                     map: map
                                 });
                                 previous_city = current_city;
@@ -190,6 +208,17 @@
             });
             event.preventDefault();
         });
+
+        function pinSymbol(color) {
+            return {
+                path: 'M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z',
+                fillColor: color,
+                fillOpacity: 1,
+                strokeColor: '#000',
+                strokeWeight: 2,
+                scale: 2
+            };
+        }
 
         function initMap() {
             directionsService = new google.maps.DirectionsService;
@@ -225,4 +254,5 @@
 
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script>
+    <script src="{% static 'js/markerwithlabel.js' %}"></script>
 {% endblock scripts %}
