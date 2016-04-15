@@ -164,7 +164,7 @@
                             };
                             locations.push(location);
                             if (previous_city !== current_city){
-                                console.log("Adding marker", location);
+                                console.log("Adding marker", marker_count, location);
                                 new google.maps.Marker({
                                     position: location,
                                     label: '' + marker_count,
