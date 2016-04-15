@@ -140,9 +140,9 @@
                 resultsDiv.html(data);
                 var source_ip = $('input[name="myDeviceIp"]').val();
                 var routes = tracedata.list;
-
+                var markers = [];
+                var previous_city = undefined;
                 $.each(routes, function (route_index, route) {
-                    var markers = [];
                     var locations = [];
                     var lastValidLocation;
                     var request = {
@@ -152,7 +152,6 @@
                         strokeOpacity: 1.0,
                         strokeWeight: 2
                     };
-                    var previous_city = undefined;
                     $.each(route.results, function (hop_index, hop) {
                         var current_city = hop.city;
                         if (hop.response && hop.latitude) {
