@@ -138,6 +138,7 @@
 
             submit_form(traceUrl, formData).done(function (data, textStatus, jqXHR) {
                 resultsDiv.html(data);
+                var route_colors = ["#FF0000", "#00FF00", "#0000FF", "#AC10FF"];
                 var source_ip = $('input[name="myDeviceIp"]').val();
                 var routes = tracedata.list;
                 var markers = [];
@@ -148,7 +149,7 @@
                     var request = {
                         path: locations,
                         geodesic: true,
-                        strokeColor: "#FF0000",
+                        strokeColor: route_colors[route_index % route_colors.length],
                         strokeOpacity: 1.0,
                         strokeWeight: 2
                     };
