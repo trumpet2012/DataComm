@@ -1,0 +1,10 @@
+web:
+  scale: 1
+nginx:
+  scale: 1
+web-static:
+  scale: 1
+  run_once: true
+web-migrations:
+  scale: 1
+  run_once: true
