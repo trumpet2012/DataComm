@@ -30,6 +30,7 @@ node {
         }
     } catch(err) {
         step([$class: 'GitHubSetCommitStatusBuilder', statusMessage: [content: 'error']])
+        currentBuild.result = 'FAILURE'
         echo "Failed with" + err
         throw err
     }
