@@ -28,4 +28,3 @@ node {
 
     echo "Docker images updated"
 }
-
