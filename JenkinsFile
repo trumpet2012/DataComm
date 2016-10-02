@@ -7,6 +7,9 @@ node {
 
     def commit_id = sh 'git rev-parse HEAD'
 
+    def pwd = sh 'ls'
+    echo pwd
+
     stage 'Build'
     docker.withRegistry('http://registry.hub.docker.com', 'docker-login') {
 
